@@ -33,6 +33,28 @@ export default function ConfirmationPage() {
       const rest = await getRestaurant(res.restaurantId)
       setRestaurant(rest)
       setLoading(false)
+
+      // Auto-send WhatsApp confirmation if guest has a phone number
+      if (res.guestPhone) {
+        try {
+          await fetch('/api/whatsapp', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              phone:          res.guestPhone,
+              name:           res.guestName,
+              restaurantName: rest?.name ?? '',
+              date:           formatDate(res.date),
+              time:           res.timeSlot,
+              guestCount:     res.guestCount,
+              referenceCode:  res.referenceCode,
+            }),
+          })
+          setWaSent(true)
+        } catch (e) {
+          console.error('WhatsApp auto-send failed:', e)
+        }
+      }
     }
     load()
   }, [reservationId, router])
