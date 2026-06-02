@@ -6,8 +6,8 @@ export default function LaporanPage() {
           📊
         </div>
         <h1 className="font-display font-bold text-ink text-2xl mb-2">Laporan</h1>
-        <p className="text-sm font-sans text-muted mb-1">Analitik dan performa restoran</p>
-        <p className="text-xs font-sans text-muted/60 mt-4 bg-sand rounded-xl px-4 py-2.5 inline-block">
+        <p className="text-sm font-sans text-ink/60 mb-1">Analitik dan performa restoran</p>
+        <p className="text-xs font-sans text-ink/60/60 mt-4 bg-sand rounded-xl px-4 py-2.5 inline-block">
           Segera hadir · Sprint berikutnya
         </p>
       </div>

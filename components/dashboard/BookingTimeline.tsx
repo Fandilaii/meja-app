@@ -40,11 +40,11 @@ export default function BookingTimeline({ reservations }: Props) {
           const slotReservations = reservations.filter((r) => r.timeSlot === slot)
           return (
             <div key={slot} className="flex gap-3 px-4 py-2.5 border-b border-meja-border/50 last:border-0">
-              <span className="w-11 flex-shrink-0 text-[10px] font-mono text-muted pt-0.5">{slot}</span>
+              <span className="w-11 flex-shrink-0 text-[10px] font-mono text-ink/60 pt-0.5">{slot}</span>
               <div className="flex-1 space-y-1.5">
                 {slotReservations.length === 0 ? (
                   <div className="h-6 flex items-center">
-                    <span className="text-[11px] text-muted/70 font-sans">—</span>
+                    <span className="text-[11px] text-ink/60/70 font-sans">—</span>
                   </div>
                 ) : (
                   slotReservations.map((res) => {
@@ -57,7 +57,7 @@ export default function BookingTimeline({ reservations }: Props) {
                       >
                         <div>
                           <span className="text-[11px] font-sans font-bold text-ink">{res.guestName}</span>
-                          <span className="text-[10px] font-sans text-muted ml-2">
+                          <span className="text-[10px] font-sans text-ink/60 ml-2">
                             Meja {res.tableId !== 'auto' ? res.tableId : '—'} · {res.guestCount} tamu
                           </span>
                         </div>
@@ -65,7 +65,7 @@ export default function BookingTimeline({ reservations }: Props) {
                           <span className={`text-[10px] font-sans px-2 py-0.5 rounded-full ${badge?.bg} ${badge?.text}`}>
                             {badge?.label}
                           </span>
-                          <span className="text-[10px] font-sans text-muted bg-meja-border/50 rounded-full px-1.5 py-0.5">
+                          <span className="text-[10px] font-sans text-ink/60 bg-meja-border/50 rounded-full px-1.5 py-0.5">
                             {res.guestCount}
                           </span>
                         </div>

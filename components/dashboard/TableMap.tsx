@@ -19,7 +19,7 @@ export default function TableMap({ tables }: Props) {
           {Object.entries(STATE_CONFIG).map(([key, { bg, text, label }]) => (
             <div key={key} className="flex items-center gap-1">
               <div className={`w-2 h-2 rounded-full ${bg} border border-current ${text}`} />
-              <span className="text-[10px] font-sans text-muted">{label}</span>
+              <span className="text-[10px] font-sans text-ink/60">{label}</span>
             </div>
           ))}
         </div>

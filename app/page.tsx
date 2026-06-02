@@ -112,8 +112,8 @@ export default function DiscoveryPage() {
           </div>
         ) : filtered.length === 0 ? (
           <div className="text-center py-16">
-            <p className="font-display text-xl text-muted">Tidak ada restoran ditemukan</p>
-            <p className="text-sm font-sans text-muted mt-1">Coba ubah filter atau kata kunci</p>
+            <p className="font-display text-xl text-ink/60">Tidak ada restoran ditemukan</p>
+            <p className="text-sm font-sans text-ink/60 mt-1">Coba ubah filter atau kata kunci</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

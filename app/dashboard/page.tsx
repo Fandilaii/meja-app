@@ -91,7 +91,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-display font-medium text-ink text-lg">{formatDate(new Date())}</h2>
-          <p className="text-xs font-sans text-muted mt-0.5">Shift malam · 17:00 – 23:00 WIB</p>
+          <p className="text-xs font-sans text-ink/60 mt-0.5">Shift malam · 17:00 – 23:00 WIB</p>
         </div>
         <button className="flex items-center gap-2 px-4 py-2 rounded-[9999px] bg-ink text-cream text-sm font-sans font-medium hover:bg-gold-dark transition-colors">
           <Plus size={15} />

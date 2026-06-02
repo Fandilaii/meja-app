@@ -102,13 +102,13 @@ export default function RestaurantDetailPage() {
         </div>
         <div className="w-px h-4 bg-meja-border" />
         <div className="flex items-center gap-1.5">
-          <Clock size={14} className="text-muted" />
-          <span className="text-sm font-sans text-muted">{restaurant.openTime} – {restaurant.closeTime}</span>
+          <Clock size={14} className="text-ink/60" />
+          <span className="text-sm font-sans text-ink/60">{restaurant.openTime} – {restaurant.closeTime}</span>
         </div>
         <div className="w-px h-4 bg-meja-border" />
         <div className="flex items-center gap-1.5">
-          <MapPin size={14} className="text-muted" />
-          <span className="text-sm font-sans text-muted">{restaurant.area}</span>
+          <MapPin size={14} className="text-ink/60" />
+          <span className="text-sm font-sans text-ink/60">{restaurant.area}</span>
         </div>
         <div className="ml-auto">
           <AvailabilityBadge status={availability} />

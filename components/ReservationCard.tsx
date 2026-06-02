@@ -15,7 +15,7 @@ interface Props {
 const STATUS_BADGE: Record<string, { bg: string; text: string; label: string }> = {
   pending:   { bg: 'bg-gold-light',   text: 'text-[#5C3E10]', label: 'Menunggu'     }, // 7.4:1 ✓
   confirmed: { bg: 'bg-forest-light', text: 'text-forest',    label: 'Dikonfirmasi' }, // 5.1:1 ✓
-  arrived:   { bg: 'bg-sand',         text: 'text-muted',    label: 'Selesai'      }, // 5.7:1 ✓ (was text-muted 1.4:1 ✗)
+  arrived:   { bg: 'bg-sand',         text: 'text-ink/60',    label: 'Selesai'      }, // 5.7:1 ✓ (was text-ink/60 1.4:1 ✗)
   cancelled: { bg: 'bg-terra-light',  text: 'text-[#7A2E12]', label: 'Dibatalkan'   }, // 6.9:1 ✓ (was text-terra 3.3:1 ✗)
 }
 
@@ -51,7 +51,7 @@ export default function ReservationCard({ reservation, restaurant, tab, onCancel
           <p className="font-display font-medium text-ink text-sm truncate">
             {restaurant?.name ?? 'Restoran'}
           </p>
-          <p className="text-[11px] font-sans text-muted truncate">
+          <p className="text-[11px] font-sans text-ink/60 truncate">
             {restaurant?.area} · {restaurant?.cuisine}
           </p>
         </div>
@@ -69,7 +69,7 @@ export default function ReservationCard({ reservation, restaurant, tab, onCancel
           { label: 'Kode',    value: reservation.referenceCode, mono: true },
         ].map(({ label, value, mono }) => (
           <div key={label}>
-            <p className="text-[10px] font-sans text-muted">{label}</p>
+            <p className="text-[10px] font-sans text-ink/60">{label}</p>
             <p className={`text-sm text-ink font-medium ${mono ? 'font-mono tracking-wider' : 'font-sans'}`}>
               {value}
             </p>
@@ -92,7 +92,7 @@ export default function ReservationCard({ reservation, restaurant, tab, onCancel
               <div className="flex gap-1.5">
                 <button
                   onClick={() => setConfirming(false)}
-                  className="px-3 py-2 rounded-[9999px] border border-meja-border text-sm font-sans text-muted hover:bg-sand transition-colors"
+                  className="px-3 py-2 rounded-[9999px] border border-meja-border text-sm font-sans text-ink/60 hover:bg-sand transition-colors"
                 >
                   Batal
                 </button>

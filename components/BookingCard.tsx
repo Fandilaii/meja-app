@@ -79,16 +79,16 @@ export default function BookingCard({ restaurant, reservations }: Props) {
 
   return (
     <div className="bg-sand rounded-2xl p-5 space-y-5">
-      <p className="text-[11px] font-sans font-medium text-muted uppercase tracking-wider">
+      <p className="text-[11px] font-sans font-medium text-ink/60 uppercase tracking-wider">
         Buat Reservasi
       </p>
 
       {/* Name + Phone */}
       <div className="space-y-3">
         <div>
-          <label className="block text-[11px] font-sans text-muted mb-1.5">Nama Lengkap</label>
+          <label className="block text-[11px] font-sans text-ink/60 mb-1.5">Nama Lengkap</label>
           <div className="relative">
-            <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+            <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/60 pointer-events-none" />
             <input
               type="text"
               value={guestName}
@@ -103,9 +103,9 @@ export default function BookingCard({ restaurant, reservations }: Props) {
         </div>
 
         <div>
-          <label className="block text-[11px] font-sans text-muted mb-1.5">Nomor WhatsApp</label>
+          <label className="block text-[11px] font-sans text-ink/60 mb-1.5">Nomor WhatsApp</label>
           <div className="relative">
-            <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+            <Phone size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/60 pointer-events-none" />
             <input
               type="tel"
               value={guestPhone}
@@ -118,7 +118,7 @@ export default function BookingCard({ restaurant, reservations }: Props) {
           </div>
           {errors.phone
             ? <p className="text-[11px] text-terra font-sans mt-1">{errors.phone}</p>
-            : <p className="text-[10px] text-muted font-sans mt-1">Konfirmasi reservasi akan dikirim ke nomor ini</p>
+            : <p className="text-[10px] text-ink/60 font-sans mt-1">Konfirmasi reservasi akan dikirim ke nomor ini</p>
           }
         </div>
       </div>
@@ -126,9 +126,9 @@ export default function BookingCard({ restaurant, reservations }: Props) {
       {/* Date + Guest row */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-[11px] font-sans text-muted mb-1.5">Tanggal</label>
+          <label className="block text-[11px] font-sans text-ink/60 mb-1.5">Tanggal</label>
           <div className="relative">
-            <CalendarDays size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+            <CalendarDays size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/60 pointer-events-none" />
             <input
               type="date"
               value={date}
@@ -140,9 +140,9 @@ export default function BookingCard({ restaurant, reservations }: Props) {
         </div>
 
         <div>
-          <label className="block text-[11px] font-sans text-muted mb-1.5">Jumlah Tamu</label>
+          <label className="block text-[11px] font-sans text-ink/60 mb-1.5">Jumlah Tamu</label>
           <div className="relative">
-            <Users size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+            <Users size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-ink/60 pointer-events-none" />
             <div className="pl-8 pr-3 py-2.5 rounded-lg border border-meja-border bg-white text-sm font-sans text-ink">
               {guestCount} orang
             </div>
@@ -152,13 +152,13 @@ export default function BookingCard({ restaurant, reservations }: Props) {
 
       {/* Guest picker */}
       <div>
-        <label className="block text-[11px] font-sans text-muted mb-2">Pilih Jumlah Tamu</label>
+        <label className="block text-[11px] font-sans text-ink/60 mb-2">Pilih Jumlah Tamu</label>
         <GuestPicker value={guestCount} onChange={setGuest} />
       </div>
 
       {/* Time slots */}
       <div>
-        <label className="block text-[11px] font-sans text-muted mb-2">Pilih Waktu</label>
+        <label className="block text-[11px] font-sans text-ink/60 mb-2">Pilih Waktu</label>
         <TimeSlotPicker
           slots={slots}
           disabledSlots={disabledSlots}
@@ -184,7 +184,7 @@ export default function BookingCard({ restaurant, reservations }: Props) {
         )}
       </button>
 
-      <p className="text-[10px] text-muted font-sans text-center">
+      <p className="text-[10px] text-ink/60 font-sans text-center">
         Gratis · Tidak ada biaya reservasi
       </p>
     </div>

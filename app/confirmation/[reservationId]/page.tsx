@@ -117,7 +117,7 @@ export default function ConfirmationPage() {
             </div>
             <div>
               <p className="font-display font-medium text-ink text-base">{restaurant.name}</p>
-              <p className="text-xs font-sans text-muted">{restaurant.area}</p>
+              <p className="text-xs font-sans text-ink/60">{restaurant.area}</p>
             </div>
           </div>
 
@@ -133,7 +133,7 @@ export default function ConfirmationPage() {
               { label: 'Status',    value: reservation.status === 'confirmed' ? 'Dikonfirmasi' : reservation.status },
             ].map(({ label, value }) => (
               <div key={label} className="flex items-center justify-between">
-                <span className="text-sm font-sans text-muted">{label}</span>
+                <span className="text-sm font-sans text-ink/60">{label}</span>
                 <span className="text-sm font-sans font-medium text-ink">{value}</span>
               </div>
             ))}
@@ -142,7 +142,7 @@ export default function ConfirmationPage() {
 
         {/* Reference code */}
         <div className="bg-sand rounded-2xl p-4">
-          <p className="text-[11px] font-sans text-muted uppercase tracking-wider mb-2">Kode Reservasi</p>
+          <p className="text-[11px] font-sans text-ink/60 uppercase tracking-wider mb-2">Kode Reservasi</p>
           <div className="flex items-center justify-between">
             <code className="font-mono font-bold text-xl text-ink tracking-widest">
               {reservation.referenceCode}
@@ -172,12 +172,12 @@ export default function ConfirmationPage() {
         {/* Back home */}
         <button
           onClick={() => router.push('/')}
-          className="w-full py-3 rounded-[9999px] text-sm font-sans font-medium text-muted border border-meja-border hover:bg-sand transition-colors"
+          className="w-full py-3 rounded-[9999px] text-sm font-sans font-medium text-ink/60 border border-meja-border hover:bg-sand transition-colors"
         >
           Kembali ke Beranda
         </button>
 
-        <p className="text-[10px] text-muted font-sans text-center">
+        <p className="text-[10px] text-ink/60 font-sans text-center">
           Konfirmasi juga dikirim ke WhatsApp dan emailmu.
         </p>
       </div>

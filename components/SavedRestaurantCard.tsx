@@ -34,7 +34,7 @@ export default function SavedRestaurantCard({ restaurant, onRemove }: Props) {
       {/* Info */}
       <Link href={`/restaurant/${restaurant.id}`} className="flex-1 min-w-0">
         <p className="font-display font-medium text-ink text-sm truncate">{restaurant.name}</p>
-        <p className="text-[11px] font-sans text-muted truncate">{restaurant.cuisine} · {restaurant.area}</p>
+        <p className="text-[11px] font-sans text-ink/60 truncate">{restaurant.cuisine} · {restaurant.area}</p>
         <div className="flex items-center gap-1 mt-1">
           <Star size={10} className="fill-gold text-gold" />
           <span className="text-[11px] font-sans text-ink">{restaurant.rating}</span>

@@ -99,7 +99,7 @@ export default function ProfilPage() {
           {/* Name row */}
           <div className="px-4 py-3.5 flex items-center gap-3">
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-sans text-muted uppercase tracking-wider">Nama Lengkap</p>
+              <p className="text-[10px] font-sans text-ink/60 uppercase tracking-wider">Nama Lengkap</p>
               {editingName ? (
                 <input
                   autoFocus
@@ -114,7 +114,7 @@ export default function ProfilPage() {
             </div>
             <button
               onClick={() => editingName ? saveName() : setEditingName(true)}
-              className="p-2 rounded-lg hover:bg-sand transition-colors text-muted hover:text-ink"
+              className="p-2 rounded-lg hover:bg-sand transition-colors text-ink/60 hover:text-ink"
             >
               {editingName ? <Check size={16} className="text-forest" /> : <Pencil size={15} />}
             </button>
@@ -123,7 +123,7 @@ export default function ProfilPage() {
           {/* Phone row */}
           <div className="px-4 py-3.5 flex items-center gap-3">
             <div className="flex-1 min-w-0">
-              <p className="text-[10px] font-sans text-muted uppercase tracking-wider">Nomor WhatsApp</p>
+              <p className="text-[10px] font-sans text-ink/60 uppercase tracking-wider">Nomor WhatsApp</p>
               {editingPhone ? (
                 <input
                   autoFocus
@@ -140,7 +140,7 @@ export default function ProfilPage() {
             </div>
             <button
               onClick={() => editingPhone ? savePhone() : setEditingPhone(true)}
-              className="p-2 rounded-lg hover:bg-sand transition-colors text-muted hover:text-ink"
+              className="p-2 rounded-lg hover:bg-sand transition-colors text-ink/60 hover:text-ink"
             >
               {editingPhone ? <Check size={16} className="text-forest" /> : <Pencil size={15} />}
             </button>
@@ -151,11 +151,11 @@ export default function ProfilPage() {
         <div className="grid grid-cols-2 gap-3">
           <div className="bg-sand rounded-xl p-4">
             <p className="font-display font-bold text-2xl text-ink">{reservationCount}</p>
-            <p className="text-[11px] font-sans text-muted mt-1">total reservasi</p>
+            <p className="text-[11px] font-sans text-ink/60 mt-1">total reservasi</p>
           </div>
           <div className="bg-sand rounded-xl p-4">
             <p className="font-display font-bold text-2xl text-ink">{favoriteArea ?? '—'}</p>
-            <p className="text-[11px] font-sans text-muted mt-1">area tersimpan</p>
+            <p className="text-[11px] font-sans text-ink/60 mt-1">area tersimpan</p>
           </div>
         </div>
 
@@ -168,8 +168,8 @@ export default function ProfilPage() {
             </div>
           ) : savedRestaurants.length === 0 ? (
             <div className="text-center py-8 bg-white rounded-2xl border border-meja-border">
-              <p className="text-sm font-sans text-muted">Belum ada restoran tersimpan</p>
-              <p className="text-xs font-sans text-muted/60 mt-1">Tap ♥ di restoran favoritmu</p>
+              <p className="text-sm font-sans text-ink/60">Belum ada restoran tersimpan</p>
+              <p className="text-xs font-sans text-ink/60/60 mt-1">Tap ♥ di restoran favoritmu</p>
             </div>
           ) : (
             <div className="space-y-2">
@@ -187,14 +187,14 @@ export default function ProfilPage() {
               {i > 0 && <Separator />}
               <button className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-sand transition-colors">
                 <span className="text-sm font-sans text-ink">{link.label}</span>
-                <ChevronRight size={15} className="text-muted" />
+                <ChevronRight size={15} className="text-ink/60" />
               </button>
             </div>
           ))}
           <Separator />
           <div className="flex items-center justify-between px-4 py-3.5">
-            <span className="text-sm font-sans text-muted">Versi Aplikasi</span>
-            <span className="text-sm font-sans text-muted">1.0.0</span>
+            <span className="text-sm font-sans text-ink/60">Versi Aplikasi</span>
+            <span className="text-sm font-sans text-ink/60">1.0.0</span>
           </div>
         </div>
       </div>
