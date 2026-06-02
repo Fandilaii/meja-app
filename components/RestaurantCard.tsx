@@ -67,17 +67,17 @@ export default function RestaurantCard({ restaurant, availability, saved = false
             {restaurant.name}
           </h3>
           <div className="flex items-center gap-1.5 mt-1">
-            <span className="text-[11px] text-muted font-sans">{restaurant.cuisine}</span>
-            <span className="text-[11px] text-meja-border">·</span>
-            <MapPin size={10} className="text-muted" />
-            <span className="text-[11px] text-muted font-sans">{restaurant.area}</span>
+            <span className="text-xs text-ink/60 font-sans">{restaurant.cuisine}</span>
+            <span className="text-xs text-ink/30">·</span>
+            <MapPin size={10} className="text-ink/50" />
+            <span className="text-xs text-ink/60 font-sans">{restaurant.area}</span>
           </div>
           <div className="flex items-center justify-between mt-2.5">
             <div className="flex items-center gap-1">
               <Star size={12} className="fill-gold text-gold" />
               <span className="text-xs font-medium text-ink font-sans">{restaurant.rating}</span>
             </div>
-            <span className="text-[11px] text-muted font-sans">{formatPrice(restaurant.priceMin, restaurant.priceMax)}</span>
+            <span className="text-xs font-medium text-ink/60 font-sans">{formatPrice(restaurant.priceMin, restaurant.priceMax)}</span>
           </div>
         </div>
       </div>
