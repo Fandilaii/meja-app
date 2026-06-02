@@ -7,6 +7,7 @@ import GuestPicker from './GuestPicker'
 import TimeSlotPicker from './TimeSlotPicker'
 import type { Restaurant, Reservation } from '@/types'
 import { generateTimeSlots, isSlotAvailable, createReservation } from '@/lib/firestore'
+import { addReservationId, saveGuestProfile, getGuestProfile } from '@/lib/localStorage'
 
 interface Props {
   restaurant: Restaurant
@@ -22,8 +23,8 @@ export default function BookingCard({ restaurant, reservations }: Props) {
   const [date, setDate]         = useState(todayString())
   const [guestCount, setGuest]  = useState(2)
   const [selectedSlot, setSlot] = useState<string | null>(null)
-  const [guestName, setName]    = useState('')
-  const [guestPhone, setPhone]  = useState('')
+  const [guestName, setName]    = useState(() => getGuestProfile()?.name  ?? '')
+  const [guestPhone, setPhone]  = useState(() => getGuestProfile()?.phone ?? '')
   const [loading, setLoading]   = useState(false)
   const [errors, setErrors]     = useState<{ name?: string; phone?: string }>({})
 
@@ -64,6 +65,8 @@ export default function BookingCard({ restaurant, reservations }: Props) {
         guestCount,
         status:       'confirmed',
       })
+      addReservationId(reservation.id)
+      saveGuestProfile({ name: guestName.trim(), phone: normalizePhone(guestPhone.trim()) })
       router.push(`/confirmation/${reservation.id}`)
     } catch (err) {
       console.error(err)

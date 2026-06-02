@@ -9,6 +9,7 @@ import { ArrowLeft, Heart, Star, Clock, MapPin } from 'lucide-react'
 import BookingCard from '@/components/BookingCard'
 import AvailabilityBadge from '@/components/AvailabilityBadge'
 import { getRestaurant, getReservationsForDate, getAvailabilityStatus } from '@/lib/firestore'
+import { isSavedRestaurant, toggleSavedRestaurant } from '@/lib/localStorage'
 import type { Restaurant, Reservation, AvailabilityStatus } from '@/types'
 
 function todayString(): string {
@@ -22,7 +23,7 @@ export default function RestaurantDetailPage() {
   const [restaurant, setRestaurant]     = useState<Restaurant | null>(null)
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [availability, setAvailability] = useState<AvailabilityStatus>('Tersedia')
-  const [saved, setSaved]               = useState(false)
+  const [saved, setSaved]               = useState(() => isSavedRestaurant(id))
   const [loading, setLoading]           = useState(true)
 
   useEffect(() => {
@@ -75,7 +76,7 @@ export default function RestaurantDetailPage() {
             <ArrowLeft size={18} />
           </button>
           <button
-            onClick={() => setSaved(!saved)}
+            onClick={() => setSaved(toggleSavedRestaurant(id))}
             className="w-10 h-10 rounded-full bg-black/30 backdrop-blur-sm border border-white/20 flex items-center justify-center text-cream hover:bg-black/50 transition-colors"
           >
             <Heart size={18} className={saved ? 'fill-terra text-terra' : ''} />

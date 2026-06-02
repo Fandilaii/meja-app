@@ -8,6 +8,7 @@ import {
   query,
   where,
   orderBy,
+  documentId,
   Timestamp,
   serverTimestamp,
 } from 'firebase/firestore'
@@ -98,6 +99,24 @@ export async function getReservation(id: string): Promise<Reservation | null> {
     ...snap.data(),
     createdAt: (snap.data().createdAt as Timestamp)?.toDate?.() ?? new Date(),
   } as Reservation
+}
+
+export async function getReservationsByIds(ids: string[]): Promise<Reservation[]> {
+  if (ids.length === 0) return []
+  const results: Reservation[] = []
+  for (let i = 0; i < ids.length; i += 30) {
+    const chunk = ids.slice(i, i + 30)
+    const q     = query(collection(requireDb(), 'reservations'), where(documentId(), 'in', chunk))
+    const snap  = await getDocs(q)
+    snap.docs.forEach((d) =>
+      results.push({
+        id: d.id,
+        ...d.data(),
+        createdAt: (d.data().createdAt as Timestamp)?.toDate?.() ?? new Date(),
+      } as Reservation)
+    )
+  }
+  return results
 }
 
 export async function createReservation(

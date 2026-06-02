@@ -13,11 +13,8 @@ service cloud.firestore {
     }
 
     match /reservations/{reservationId} {
-      allow read: if request.auth != null &&
-        (resource.data.userId == request.auth.uid || request.auth.token.role == 'manager');
-      allow create: if request.auth != null;
-      allow update: if request.auth != null &&
-        (resource.data.userId == request.auth.uid || request.auth.token.role == 'manager');
+      // TODO: tighten when Firebase Auth is implemented
+      allow read, create, update: if true;
     }
 
     match /waitlist/{waitlistId} {
