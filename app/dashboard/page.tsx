@@ -16,7 +16,8 @@ import {
 } from '@/lib/firestore'
 import type { Restaurant, RestaurantTable, Reservation, WaitlistEntry } from '@/types'
 
-const DEMO_RESTAURANT_ID = 'demo' // replace with real ID after seeding
+// Nusa Gastronomy — seeded via scripts/seed.ts
+const DEMO_RESTAURANT_ID = 'P3R1nyDl8sqYukKkculP'
 
 function todayString(): string {
   return new Date().toISOString().split('T')[0]

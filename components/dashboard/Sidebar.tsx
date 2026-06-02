@@ -2,23 +2,36 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { useEffect, useState } from 'react'
 import {
   LayoutDashboard, Calendar, Grid3X3, Users, BarChart3,
   Settings, ListOrdered, ChevronRight,
 } from 'lucide-react'
+import { getRestaurant } from '@/lib/firestore'
+import type { Restaurant } from '@/types'
+
+const RESTAURANT_ID = 'P3R1nyDl8sqYukKkculP'
 
 const NAV_ITEMS = [
-  { href: '/dashboard',           label: 'Dashboard',  Icon: LayoutDashboard },
-  { href: '/dashboard/kalender',  label: 'Kalender',   Icon: Calendar        },
-  { href: '/dashboard/meja',      label: 'Meja',       Icon: Grid3X3         },
-  { href: '/dashboard/waitlist',  label: 'Waitlist',   Icon: ListOrdered     },
-  { href: '/dashboard/tamu',      label: 'Tamu',       Icon: Users           },
-  { href: '/dashboard/laporan',   label: 'Laporan',    Icon: BarChart3       },
-  { href: '/dashboard/pengaturan',label: 'Pengaturan', Icon: Settings        },
+  { href: '/dashboard',            label: 'Dashboard',  Icon: LayoutDashboard },
+  { href: '/dashboard/kalender',   label: 'Kalender',   Icon: Calendar        },
+  { href: '/dashboard/meja',       label: 'Meja',       Icon: Grid3X3         },
+  { href: '/dashboard/waitlist',   label: 'Waitlist',   Icon: ListOrdered     },
+  { href: '/dashboard/tamu',       label: 'Tamu',       Icon: Users           },
+  { href: '/dashboard/laporan',    label: 'Laporan',    Icon: BarChart3       },
+  { href: '/dashboard/pengaturan', label: 'Pengaturan', Icon: Settings        },
 ]
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const [restaurant, setRestaurant] = useState<Restaurant | null>(null)
+
+  useEffect(() => {
+    getRestaurant(RESTAURANT_ID).then(setRestaurant)
+  }, [])
+
+  const name = restaurant?.name ?? 'Memuat...'
+  const area = restaurant ? `${restaurant.area}, Jakarta` : ''
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-[200px] bg-ink flex flex-col z-50">
@@ -27,8 +40,8 @@ export default function Sidebar() {
         <div className="font-display font-bold text-2xl text-cream">
           Meja<span className="text-gold">.</span>
         </div>
-        <p className="text-[11px] font-sans text-muted mt-1">Nusa Gastronomy</p>
-        <p className="text-[10px] font-sans text-muted/60">SCBD, Jakarta</p>
+        <p className="text-[11px] font-sans text-muted mt-1 truncate">{name}</p>
+        <p className="text-[10px] font-sans text-muted/60">{area}</p>
       </div>
 
       {/* Nav */}
