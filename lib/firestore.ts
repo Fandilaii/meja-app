@@ -1,0 +1,209 @@
+import {
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  addDoc,
+  updateDoc,
+  query,
+  where,
+  orderBy,
+  Timestamp,
+  serverTimestamp,
+} from 'firebase/firestore'
+import { db } from './firebase'
+import type { Restaurant, RestaurantTable, Reservation, WaitlistEntry } from '@/types'
+import type { Area } from '@/types'
+
+// ── Reference Code ────────────────────────────────────────────
+
+export function generateReferenceCode(date: Date, sequence: number): string {
+  const dd  = String(date.getDate()).padStart(2, '0')
+  const mm  = String(date.getMonth() + 1).padStart(2, '0')
+  const seq = String(sequence).padStart(2, '0')
+  return `MJ-${dd}${mm}-${seq}`
+}
+
+// ── Restaurants ───────────────────────────────────────────────
+
+function requireDb() {
+  if (!db) throw new Error('Firebase not configured — set NEXT_PUBLIC_FIREBASE_* env vars')
+  return db
+}
+
+export async function getRestaurants(area?: Area): Promise<Restaurant[]> {
+  const ref = collection(requireDb(), 'restaurants')
+  const q = area
+    ? query(ref, where('isActive', '==', true), where('area', '==', area))
+    : query(ref, where('isActive', '==', true))
+
+  const snap = await getDocs(q)
+  return snap.docs.map((d) => ({
+    id: d.id,
+    ...d.data(),
+    createdAt: (d.data().createdAt as Timestamp)?.toDate?.() ?? new Date(),
+  })) as Restaurant[]
+}
+
+export async function getRestaurant(id: string): Promise<Restaurant | null> {
+  const ref  = doc(requireDb(), 'restaurants', id)
+  const snap = await getDoc(ref)
+  if (!snap.exists()) return null
+  return {
+    id: snap.id,
+    ...snap.data(),
+    createdAt: (snap.data().createdAt as Timestamp)?.toDate?.() ?? new Date(),
+  } as Restaurant
+}
+
+// ── Tables ────────────────────────────────────────────────────
+
+export async function getRestaurantTables(restaurantId: string): Promise<RestaurantTable[]> {
+  const ref  = collection(requireDb(), 'restaurants', restaurantId, 'tables')
+  const snap = await getDocs(ref)
+  return snap.docs.map((d) => ({
+    id: d.id,
+    restaurantId,
+    ...d.data(),
+  })) as RestaurantTable[]
+}
+
+// ── Reservations ──────────────────────────────────────────────
+
+export async function getReservationsForDate(
+  restaurantId: string,
+  date: string
+): Promise<Reservation[]> {
+  const ref = collection(requireDb(), 'reservations')
+  const q   = query(
+    ref,
+    where('restaurantId', '==', restaurantId),
+    where('date', '==', date),
+    where('status', 'in', ['pending', 'confirmed', 'arrived'])
+  )
+  const snap = await getDocs(q)
+  return snap.docs.map((d) => ({
+    id: d.id,
+    ...d.data(),
+    createdAt: (d.data().createdAt as Timestamp)?.toDate?.() ?? new Date(),
+  })) as Reservation[]
+}
+
+export async function getReservation(id: string): Promise<Reservation | null> {
+  const ref  = doc(requireDb(), 'reservations', id)
+  const snap = await getDoc(ref)
+  if (!snap.exists()) return null
+  return {
+    id: snap.id,
+    ...snap.data(),
+    createdAt: (snap.data().createdAt as Timestamp)?.toDate?.() ?? new Date(),
+  } as Reservation
+}
+
+export async function createReservation(
+  data: Omit<Reservation, 'id' | 'createdAt' | 'referenceCode'>
+): Promise<Reservation> {
+  // count existing reservations today to generate sequence
+  const existing = await getReservationsForDate(data.restaurantId, data.date)
+  const seq      = existing.length + 1
+  const [year, month, day] = data.date.split('-').map(Number)
+  const dateObj    = new Date(year, month - 1, day)
+  const refCode    = generateReferenceCode(dateObj, seq)
+
+  const docRef = await addDoc(collection(requireDb(), 'reservations'), {
+    ...data,
+    referenceCode: refCode,
+    createdAt: serverTimestamp(),
+  })
+
+  return {
+    id: docRef.id,
+    ...data,
+    referenceCode: refCode,
+    createdAt: new Date(),
+  }
+}
+
+export async function updateReservationStatus(
+  id: string,
+  status: Reservation['status']
+): Promise<void> {
+  await updateDoc(doc(requireDb(), 'reservations', id), { status })
+}
+
+// ── Waitlist ──────────────────────────────────────────────────
+
+export async function getWaitlist(restaurantId: string): Promise<WaitlistEntry[]> {
+  const ref = collection(requireDb(), 'waitlist')
+  const q   = query(
+    ref,
+    where('restaurantId', '==', restaurantId),
+    where('status', 'in', ['waiting', 'notified']),
+    orderBy('joinedAt', 'asc')
+  )
+  const snap = await getDocs(q)
+  return snap.docs.map((d) => ({
+    id: d.id,
+    ...d.data(),
+    joinedAt:    (d.data().joinedAt as Timestamp)?.toDate?.()    ?? new Date(),
+    notifiedAt:  (d.data().notifiedAt as Timestamp)?.toDate?.()  ?? null,
+  })) as WaitlistEntry[]
+}
+
+export async function addToWaitlist(
+  data: Omit<WaitlistEntry, 'id' | 'joinedAt' | 'notifiedAt' | 'status'>
+): Promise<WaitlistEntry> {
+  const docRef = await addDoc(collection(requireDb(), 'waitlist'), {
+    ...data,
+    status:     'waiting',
+    joinedAt:   serverTimestamp(),
+    notifiedAt: null,
+  })
+  return {
+    id: docRef.id,
+    ...data,
+    status:     'waiting',
+    joinedAt:   new Date(),
+    notifiedAt: null,
+  }
+}
+
+// ── Availability helper ───────────────────────────────────────
+
+export function getAvailabilityStatus(
+  reservedCount: number,
+  totalTables: number
+): 'Tersedia' | 'Hampir penuh' | 'Penuh' {
+  const ratio = reservedCount / totalTables
+  if (ratio >= 1)   return 'Penuh'
+  if (ratio >= 0.7) return 'Hampir penuh'
+  return 'Tersedia'
+}
+
+// ── Time slot helpers ─────────────────────────────────────────
+
+export function generateTimeSlots(openTime: string, closeTime: string): string[] {
+  const slots: string[] = []
+  const [openH, openM]   = openTime.split(':').map(Number)
+  const [closeH, closeM] = closeTime.split(':').map(Number)
+
+  let hour = openH
+  let min  = openM
+
+  while (hour < closeH || (hour === closeH && min < closeM)) {
+    slots.push(`${String(hour).padStart(2, '0')}:${String(min).padStart(2, '0')}`)
+    min += 30
+    if (min >= 60) { hour += 1; min = 0 }
+  }
+
+  return slots
+}
+
+export function isSlotAvailable(
+  slot: string,
+  reservations: Reservation[],
+  totalTables: number
+): boolean {
+  const count = reservations.filter((r) => r.timeSlot === slot).length
+  return count < totalTables
+}

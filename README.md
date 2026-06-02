@@ -1,36 +1,81 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Meja 🪑
 
-## Getting Started
+Indonesian premium restaurant reservation PWA — built with Next.js, Firebase, and Fonnte (WhatsApp).
 
-First, run the development server:
+## Stack
+
+| Layer       | Choice                          |
+|-------------|----------------------------------|
+| Framework   | Next.js (App Router)            |
+| Language    | TypeScript                      |
+| Styling     | Tailwind CSS v4 + shadcn/ui     |
+| Backend/DB  | Firebase (Firestore)            |
+| Auth        | Firebase Auth                   |
+| Storage     | Firebase Storage                |
+| WhatsApp    | Fonnte API                      |
+| Hosting     | Vercel                          |
+
+## Local Setup
 
 ```bash
+# 1. Clone repo
+git clone https://github.com/Fandilaii/meja-app.git
+cd meja-app
+
+# 2. Install dependencies
+npm install
+
+# 3. Configure environment
+cp .env.example .env.local
+# Fill in Firebase + Fonnte credentials in .env.local
+
+# 4. Start dev server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Environment Variables
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+See `.env.example` — required keys:
 
-## Learn More
+| Variable | Source |
+|----------|--------|
+| `NEXT_PUBLIC_FIREBASE_*` | Firebase Console → Project Settings |
+| `FONNTE_API_TOKEN` | [fonnte.com](https://fonnte.com) dashboard |
 
-To learn more about Next.js, take a look at the following resources:
+## Seed Data
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Populate Firestore with 5 sample restaurants:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+npx ts-node scripts/seed.ts
+```
 
-## Deploy on Vercel
+## Screens
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+| Route | Description |
+|-------|-------------|
+| `/` | Discovery — search + filter restaurants |
+| `/restaurant/[id]` | Detail + booking flow |
+| `/confirmation/[id]` | Booking confirmation + WhatsApp CTA |
+| `/dashboard` | Restaurant manager dashboard |
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Deploy
+
+1. Push to GitHub
+2. Import repo on [Vercel](https://vercel.com)
+3. Add all env vars in Vercel project settings
+4. Deploy → live URL
+
+## Firestore Rules
+
+Deploy security rules:
+
+```bash
+firebase deploy --only firestore:rules
+```
+
+---
+
+*Meja v1.0 — June 2026*
