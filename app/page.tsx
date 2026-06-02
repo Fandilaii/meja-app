@@ -60,7 +60,7 @@ export default function DiscoveryPage() {
     <div className="min-h-screen bg-cream pb-24">
       {/* Hero */}
       <div className="bg-ink px-4 pt-12 pb-6">
-        <p className="text-[12px] font-sans text-white/50 mb-1">
+        <p className="text-[12px] font-sans text-cream/70 mb-1">
           {greeting()}, Selamat datang 👋
         </p>
         <h1 className="font-display font-bold text-cream text-[28px] leading-tight tracking-[-0.02em] mb-5">
@@ -70,14 +70,14 @@ export default function DiscoveryPage() {
         <div className="relative">
           <Search
             size={16}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 pointer-events-none"
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/60 pointer-events-none"
           />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Restoran, area, atau masakan..."
-            className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 text-cream placeholder:text-white/40
+            className="w-full pl-10 pr-4 py-3 rounded-xl bg-white/10 text-cream placeholder:text-white/55
               text-sm font-sans border border-white/10 focus:outline-none focus:ring-1 focus:ring-gold/60"
           />
         </div>

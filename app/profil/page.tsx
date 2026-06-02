@@ -88,7 +88,7 @@ export default function ProfilPage() {
         <h1 className="font-display font-bold text-cream text-xl mt-3">
           {profile.name || 'Tamu Meja'}
         </h1>
-        <p className="text-sm font-sans text-white/50 mt-0.5">
+        <p className="text-sm font-sans text-cream/70 mt-0.5">
           {profile.phone || 'Tambah nomor WhatsApp'}
         </p>
       </div>

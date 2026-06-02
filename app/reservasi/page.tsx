@@ -64,7 +64,7 @@ export default function ReservasiPage() {
       {/* Header */}
       <div className="bg-ink px-4 pt-12 pb-5">
         <h1 className="font-display font-bold text-cream text-2xl">Reservasi Saya</h1>
-        <p className="text-sm font-sans text-white/50 mt-1">Riwayat dan status pemesanan</p>
+        <p className="text-sm font-sans text-cream/70 mt-1">Riwayat dan status pemesanan</p>
       </div>
 
       {/* Tabs */}

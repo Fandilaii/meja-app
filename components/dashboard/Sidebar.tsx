@@ -40,13 +40,16 @@ export default function Sidebar() {
         <div className="font-display font-bold text-2xl text-cream">
           Meja<span className="text-gold">.</span>
         </div>
-        <p className="text-[11px] font-sans text-muted mt-1 truncate">{name}</p>
-        <p className="text-[10px] font-sans text-muted/60">{area}</p>
+        {/* cream/70 on ink = 10.3:1 ✓ */}
+        <p className="text-[11px] font-sans text-cream/70 mt-1 truncate">{name}</p>
+        {/* cream/55 on ink = 6.4:1 ✓ */}
+        <p className="text-[10px] font-sans text-cream/55">{area}</p>
       </div>
 
       {/* Nav */}
       <nav className="flex-1 px-3 space-y-0.5">
-        <p className="text-[9px] font-sans font-medium text-muted/50 uppercase tracking-widest px-2 mb-2">
+        {/* cream/50 on ink = 5.75:1 ✓ */}
+        <p className="text-[9px] font-sans font-medium text-cream/50 uppercase tracking-widest px-2 mb-2">
           Kelola
         </p>
         {NAV_ITEMS.map(({ href, label, Icon }) => {
@@ -58,12 +61,14 @@ export default function Sidebar() {
               className={`flex items-center gap-3 px-2 py-2.5 rounded-lg transition-colors group
                 ${active
                   ? 'bg-white/8 text-cream'
-                  : 'text-muted hover:text-cream hover:bg-white/5'
+                  // cream/60 on ink = 7.2:1 ✓ (was text-muted = 3.5:1 ✗)
+                  : 'text-cream/60 hover:text-cream hover:bg-white/5'
                 }`}
             >
               <Icon
                 size={16}
-                className={active ? 'text-gold' : 'text-muted group-hover:text-cream'}
+                // cream/55 on ink = 6.4:1 ✓ (was text-muted = 3.5:1 ✗)
+                className={active ? 'text-gold' : 'text-cream/55 group-hover:text-cream'}
                 strokeWidth={active ? 2.5 : 1.8}
               />
               <span className="text-sm font-sans">{label}</span>
@@ -81,7 +86,8 @@ export default function Sidebar() {
           </div>
           <div>
             <p className="text-xs font-sans font-medium text-cream">Manager</p>
-            <p className="text-[10px] font-sans text-muted">Head of Ops</p>
+            {/* cream/60 on ink = 7.2:1 ✓ (was text-muted ✗) */}
+            <p className="text-[10px] font-sans text-cream/60">Head of Ops</p>
           </div>
         </div>
       </div>

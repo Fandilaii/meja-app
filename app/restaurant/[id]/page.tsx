@@ -85,7 +85,7 @@ export default function RestaurantDetailPage() {
 
         {/* Bottom text */}
         <div className="absolute bottom-4 left-4 right-4">
-          <p className="text-[10px] font-sans uppercase tracking-widest text-white/60 mb-1">
+          <p className="text-[10px] font-sans uppercase tracking-widest text-cream/75 mb-1">
             {restaurant.cuisine} · {restaurant.area}
           </p>
           <h1 className="font-display font-bold text-cream text-2xl leading-tight">

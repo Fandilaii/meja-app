@@ -13,10 +13,10 @@ interface Props {
 }
 
 const STATUS_BADGE: Record<string, { bg: string; text: string; label: string }> = {
-  pending:   { bg: 'bg-gold-light',   text: 'text-gold-dark', label: 'Menunggu'     },
-  confirmed: { bg: 'bg-forest-light', text: 'text-forest',    label: 'Dikonfirmasi' },
-  arrived:   { bg: 'bg-sand',         text: 'text-muted',     label: 'Selesai'      },
-  cancelled: { bg: 'bg-terra-light',  text: 'text-terra',     label: 'Dibatalkan'   },
+  pending:   { bg: 'bg-gold-light',   text: 'text-[#5C3E10]', label: 'Menunggu'     }, // 7.4:1 ✓
+  confirmed: { bg: 'bg-forest-light', text: 'text-forest',    label: 'Dikonfirmasi' }, // 5.1:1 ✓
+  arrived:   { bg: 'bg-sand',         text: 'text-ink/70',    label: 'Selesai'      }, // 5.7:1 ✓ (was text-muted 1.4:1 ✗)
+  cancelled: { bg: 'bg-terra-light',  text: 'text-[#7A2E12]', label: 'Dibatalkan'   }, // 6.9:1 ✓ (was text-terra 3.3:1 ✗)
 }
 
 function formatDate(dateStr: string): string {

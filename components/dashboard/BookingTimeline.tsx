@@ -14,8 +14,8 @@ const STATUS_COLORS: Record<string, string> = {
 const STATUS_BADGE: Record<string, { bg: string; text: string; label: string }> = {
   arrived:   { bg: 'bg-forest-light',  text: 'text-forest',   label: 'Hadir'      },
   confirmed: { bg: 'bg-blue-100',      text: 'text-blue-700', label: 'Konfirmasi' },
-  pending:   { bg: 'bg-gold-light',    text: 'text-gold-dark', label: 'Baru'      },
-  cancelled: { bg: 'bg-terra-light',   text: 'text-terra',    label: 'Batal'      },
+  pending:   { bg: 'bg-gold-light',    text: 'text-[#5C3E10]', label: 'Baru'      }, // 7.4:1 ✓
+  cancelled: { bg: 'bg-terra-light',   text: 'text-[#7A2E12]', label: 'Batal'      }, // 6.9:1 ✓
 }
 
 function generateSlots(): string[] {
@@ -44,7 +44,7 @@ export default function BookingTimeline({ reservations }: Props) {
               <div className="flex-1 space-y-1.5">
                 {slotReservations.length === 0 ? (
                   <div className="h-6 flex items-center">
-                    <span className="text-[11px] text-muted/40 font-sans">—</span>
+                    <span className="text-[11px] text-muted/70 font-sans">—</span>
                   </div>
                 ) : (
                   slotReservations.map((res) => {

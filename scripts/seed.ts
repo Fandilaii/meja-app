@@ -13,7 +13,8 @@ import {
   serverTimestamp,
 } from 'firebase/firestore'
 
-require('dotenv').config({ path: '.env.local' })
+import { config } from 'dotenv'
+config({ path: '.env.local' })
 
 const firebaseConfig = {
   apiKey:            process.env.NEXT_PUBLIC_FIREBASE_API_KEY,

@@ -22,7 +22,7 @@ export default function TimeSlotPicker({ slots, disabledSlots, selected, onChang
             onClick={() => onChange(slot)}
             className={`py-2 px-3 rounded-lg text-sm font-sans font-medium transition-colors
               ${disabled
-                ? 'bg-meja-border text-muted opacity-60 cursor-not-allowed'
+                ? 'bg-sand text-muted cursor-not-allowed line-through decoration-muted/40'
                 : isSelected
                   ? 'bg-ink text-cream border border-ink'
                   : 'bg-white border border-meja-border text-ink hover:border-gold'

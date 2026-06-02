@@ -38,7 +38,7 @@ export default function WaitlistPanel({ waitlist }: Props) {
     <div className="bg-white rounded-xl border border-meja-border overflow-hidden">
       <div className="px-4 py-3 border-b border-meja-border flex items-center justify-between">
         <h3 className="font-display font-medium text-ink text-base">Waitlist</h3>
-        <span className="text-xs font-sans text-muted bg-sand rounded-full px-2 py-0.5">
+        <span className="text-xs font-sans text-ink/70 bg-sand rounded-full px-2 py-0.5">
           {waitlist.filter((w) => w.status === 'waiting').length} menunggu
         </span>
       </div>
@@ -68,7 +68,7 @@ export default function WaitlistPanel({ waitlist }: Props) {
                 </div>
 
                 {/* Guest count */}
-                <span className="text-[11px] font-sans text-muted bg-sand rounded-full px-2 py-0.5 flex-shrink-0">
+                <span className="text-[11px] font-sans text-ink/70 bg-sand rounded-full px-2 py-0.5 flex-shrink-0">
                   {entry.guestCount} tamu
                 </span>
 

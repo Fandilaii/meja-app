@@ -6,9 +6,9 @@ interface Props {
 }
 
 const statusConfig: Record<AvailabilityStatus, { bg: string; text: string }> = {
-  Tersedia:     { bg: 'bg-forest-light', text: 'text-forest' },
-  'Hampir penuh': { bg: 'bg-gold-light',   text: 'text-gold-dark' },
-  Penuh:        { bg: 'bg-terra-light',  text: 'text-terra' },
+  Tersedia:       { bg: 'bg-forest-light', text: 'text-forest'       }, // 5.1:1 ✓
+  'Hampir penuh': { bg: 'bg-gold-light',   text: 'text-[#5C3E10]'    }, // 7.4:1 ✓ (was gold-dark 4.28:1 ✗)
+  Penuh:          { bg: 'bg-terra-light',  text: 'text-[#7A2E12]'    }, // 6.9:1 ✓ (was terra 3.30:1 ✗)
 }
 
 export default function AvailabilityBadge({ status, className = '' }: Props) {

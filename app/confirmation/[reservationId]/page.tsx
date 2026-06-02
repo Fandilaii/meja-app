@@ -104,7 +104,7 @@ export default function ConfirmationPage() {
           <Check size={28} className="text-white" strokeWidth={3} />
         </div>
         <h1 className="font-display font-bold text-cream text-2xl mb-1">Reservasi Berhasil!</h1>
-        <p className="text-sm font-sans text-white/50">Mejamu sudah menunggu.</p>
+        <p className="text-sm font-sans text-cream/70">Mejamu sudah menunggu.</p>
       </div>
 
       <div className="px-4 py-5 space-y-4">
