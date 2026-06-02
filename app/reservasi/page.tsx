@@ -100,10 +100,15 @@ export default function ReservasiPage() {
           ))
         ) : tabReservations.length === 0 ? (
           <div className="text-center py-16">
-            <p className="font-display text-xl text-muted">
+            <p className="font-display text-xl text-ink/75">
               {activeTab === 'upcoming'  ? 'Belum ada reservasi mendatang'
                : activeTab === 'past'   ? 'Belum ada riwayat reservasi'
                :                          'Tidak ada reservasi dibatalkan'}
+            </p>
+            <p className="text-sm font-sans text-ink/45 mt-2">
+              {activeTab === 'upcoming'  ? 'Reservasimu akan muncul di sini'
+               : activeTab === 'past'   ? 'Riwayat kunjunganmu akan muncul di sini'
+               :                          'Belum ada reservasi yang dibatalkan'}
             </p>
             {activeTab === 'upcoming' && (
               <Link
