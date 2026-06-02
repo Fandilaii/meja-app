@@ -73,7 +73,10 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
+  }
+  *:focus-visible {
+    @apply outline-2 outline-offset-2 outline-gold/70;
   }
   body {
     @apply bg-cream text-ink;
