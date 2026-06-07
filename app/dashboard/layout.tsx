@@ -1,10 +1,13 @@
-import Sidebar from '@/components/dashboard/Sidebar'
+import AuthGuard from '@/components/dashboard/AuthGuard'
+import Sidebar   from '@/components/dashboard/Sidebar'
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-screen bg-cream">
-      <Sidebar />
-      <main className="flex-1 ml-[200px] min-w-0">{children}</main>
-    </div>
+    <AuthGuard>
+      <div className="flex min-h-screen bg-cream">
+        <Sidebar />
+        <main className="flex-1 ml-[200px] min-w-0">{children}</main>
+      </div>
+    </AuthGuard>
   )
 }

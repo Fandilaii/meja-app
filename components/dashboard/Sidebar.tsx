@@ -1,14 +1,16 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
   LayoutDashboard, Calendar, Grid3X3, Users, BarChart3,
-  Settings, ListOrdered, ChevronRight,
+  Settings, ListOrdered, ChevronRight, LogOut,
 } from 'lucide-react'
 import { getRestaurant } from '@/lib/firestore'
+import { signOut, onAuthStateChange } from '@/lib/auth'
 import type { Restaurant } from '@/types'
+import type { User } from 'firebase/auth'
 
 const RESTAURANT_ID = 'P3R1nyDl8sqYukKkculP'
 
@@ -24,14 +26,33 @@ const NAV_ITEMS = [
 
 export default function Sidebar() {
   const pathname = usePathname()
+  const router   = useRouter()
   const [restaurant, setRestaurant] = useState<Restaurant | null>(null)
+  const [user,       setUser]       = useState<User | null>(null)
+  const [loggingOut, setLoggingOut] = useState(false)
 
   useEffect(() => {
     getRestaurant(RESTAURANT_ID).then(setRestaurant)
   }, [])
 
-  const name = restaurant?.name ?? 'Memuat...'
-  const area = restaurant ? `${restaurant.area}, Jakarta` : ''
+  useEffect(() => {
+    return onAuthStateChange(setUser)
+  }, [])
+
+  async function handleLogout() {
+    setLoggingOut(true)
+    try {
+      await signOut()
+      router.replace('/login')
+    } finally {
+      setLoggingOut(false)
+    }
+  }
+
+  const name    = restaurant?.name ?? 'Memuat...'
+  const area    = restaurant ? `${restaurant.area}, Jakarta` : ''
+  const initial = user?.displayName?.[0] ?? user?.email?.[0]?.toUpperCase() ?? 'M'
+  const label   = user?.displayName ?? user?.email ?? 'Manager'
 
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-[200px] bg-ink flex flex-col z-50">
@@ -61,13 +82,13 @@ export default function Sidebar() {
               className={`flex items-center gap-3 px-2 py-2.5 rounded-lg transition-colors group
                 ${active
                   ? 'bg-white/8 text-cream'
-                  // cream/60 on ink = 7.2:1 ✓ (was text-muted = 3.5:1 ✗)
+                  // cream/60 on ink = 7.2:1 ✓
                   : 'text-cream/60 hover:text-cream hover:bg-white/5'
                 }`}
             >
               <Icon
                 size={16}
-                // cream/55 on ink = 6.4:1 ✓ (was text-muted = 3.5:1 ✗)
+                // cream/55 on ink = 6.4:1 ✓
                 className={active ? 'text-gold' : 'text-cream/55 group-hover:text-cream'}
                 strokeWidth={active ? 2.5 : 1.8}
               />
@@ -78,18 +99,27 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Manager */}
-      <div className="px-4 py-5 border-t border-white/8">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-gold flex items-center justify-center font-display font-bold text-sm text-white">
-            MG
+      {/* Manager + Logout */}
+      <div className="px-4 py-4 border-t border-white/8">
+        <div className="flex items-center gap-3 mb-3">
+          <div className="w-8 h-8 rounded-full bg-gold flex items-center justify-center font-display font-bold text-sm text-white flex-shrink-0">
+            {initial}
           </div>
-          <div>
-            <p className="text-xs font-sans font-medium text-cream">Manager</p>
-            {/* cream/60 on ink = 7.2:1 ✓ (was text-muted ✗) */}
-            <p className="text-[10px] font-sans text-cream/60">Head of Ops</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-sans font-medium text-cream truncate">{label}</p>
+            {/* cream/60 on ink = 7.2:1 ✓ */}
+            <p className="text-[10px] font-sans text-cream/60">Manager</p>
           </div>
         </div>
+
+        <button
+          onClick={handleLogout}
+          disabled={loggingOut}
+          className="w-full flex items-center gap-2 px-2 py-2 rounded-lg text-cream/50 hover:text-cream hover:bg-white/5 transition-colors disabled:opacity-40"
+        >
+          <LogOut size={14} strokeWidth={1.8} />
+          <span className="text-xs font-sans">{loggingOut ? 'Keluar…' : 'Keluar'}</span>
+        </button>
       </div>
     </aside>
   )

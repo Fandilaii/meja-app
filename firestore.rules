@@ -3,25 +3,35 @@ service cloud.firestore {
   match /databases/{database}/documents {
 
     match /restaurants/{restaurantId} {
+      // Anyone can read restaurant listings (guest discovery)
       allow read: if true;
+      // Only authenticated managers can modify restaurant data
       allow write: if request.auth != null && request.auth.token.role == 'manager';
 
       match /tables/{tableId} {
         allow read: if true;
+        // Any authenticated user (manager) can update table status
         allow write: if request.auth != null;
       }
     }
 
     match /reservations/{reservationId} {
-      // TODO: tighten when Firebase Auth is implemented
-      allow read, create, update: if true;
+      // Guests can create reservations without an account
+      allow create: if true;
+      // Managers (any auth'd user) can read and update reservations
+      // e.g. mark as arrived, cancel, confirm
+      allow read, update: if request.auth != null;
     }
 
     match /waitlist/{waitlistId} {
-      allow read, write: if request.auth != null;
+      // Guests can join the waitlist without an account
+      allow create: if true;
+      // Managers can read and update waitlist entries
+      allow read, update: if request.auth != null;
     }
 
     match /users/{userId} {
+      // Users can only read/write their own profile
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
   }
