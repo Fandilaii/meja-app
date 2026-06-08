@@ -5,12 +5,15 @@ import {
   getDoc,
   addDoc,
   updateDoc,
+  deleteDoc,
   query,
   where,
   orderBy,
   documentId,
+  onSnapshot,
   Timestamp,
   serverTimestamp,
+  type Unsubscribe,
 } from 'firebase/firestore'
 import { db } from './firebase'
 import type { Restaurant, RestaurantTable, Reservation, WaitlistEntry } from '@/types'
@@ -67,6 +70,48 @@ export async function getRestaurantTables(restaurantId: string): Promise<Restaur
     restaurantId,
     ...d.data(),
   })) as RestaurantTable[]
+}
+
+/** Real-time listener — returns unsubscribe fn */
+export function subscribeToTables(
+  restaurantId: string,
+  callback: (tables: RestaurantTable[]) => void
+): Unsubscribe {
+  const ref = collection(requireDb(), 'restaurants', restaurantId, 'tables')
+  const q   = query(ref, orderBy('tableNumber', 'asc'))
+  return onSnapshot(q, (snap) => {
+    callback(
+      snap.docs.map((d) => ({
+        id: d.id,
+        restaurantId,
+        ...d.data(),
+      })) as RestaurantTable[]
+    )
+  })
+}
+
+export async function addRestaurantTable(
+  restaurantId: string,
+  data: { tableNumber: string; capacity: number }
+): Promise<RestaurantTable> {
+  const ref    = collection(requireDb(), 'restaurants', restaurantId, 'tables')
+  const docRef = await addDoc(ref, { ...data, status: 'available' })
+  return { id: docRef.id, restaurantId, status: 'available', ...data }
+}
+
+export async function updateTableStatus(
+  restaurantId: string,
+  tableId: string,
+  status: RestaurantTable['status']
+): Promise<void> {
+  await updateDoc(doc(requireDb(), 'restaurants', restaurantId, 'tables', tableId), { status })
+}
+
+export async function deleteRestaurantTable(
+  restaurantId: string,
+  tableId: string
+): Promise<void> {
+  await deleteDoc(doc(requireDb(), 'restaurants', restaurantId, 'tables', tableId))
 }
 
 // ── Reservations ──────────────────────────────────────────────
