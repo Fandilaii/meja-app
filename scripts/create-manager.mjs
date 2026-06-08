@@ -33,10 +33,19 @@ admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
 })
 
-// ── Config ────────────────────────────────────────────────────────────────────
-const MANAGER_EMAIL    = 'manager@meja.id'      // change as needed
-const MANAGER_PASSWORD = 'Meja2025!'             // change — must be ≥ 6 chars
-const MANAGER_NAME     = 'Manager Nusa'
+// ── Config — pass via environment variables, never hardcode ──────────────────
+// Usage:
+//   MANAGER_EMAIL=you@example.com MANAGER_PASSWORD=yourpass node scripts/create-manager.mjs
+const MANAGER_EMAIL    = process.env.MANAGER_EMAIL    ?? ''
+const MANAGER_PASSWORD = process.env.MANAGER_PASSWORD ?? ''
+const MANAGER_NAME     = process.env.MANAGER_NAME     ?? 'Manager'
+
+if (!MANAGER_EMAIL || !MANAGER_PASSWORD) {
+  console.error('Error: set MANAGER_EMAIL and MANAGER_PASSWORD environment variables.')
+  console.error('Example:')
+  console.error('  MANAGER_EMAIL=you@example.com MANAGER_PASSWORD=yourpass node scripts/create-manager.mjs')
+  process.exit(1)
+}
 // ─────────────────────────────────────────────────────────────────────────────
 
 async function run() {
