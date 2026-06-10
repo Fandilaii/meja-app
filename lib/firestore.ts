@@ -232,6 +232,50 @@ export async function addToWaitlist(
   }
 }
 
+/** Real-time listener for active waitlist entries (waiting + notified) */
+export function subscribeToWaitlist(
+  restaurantId: string,
+  callback: (entries: WaitlistEntry[]) => void
+): Unsubscribe {
+  const ref = collection(requireDb(), 'waitlist')
+  const q   = query(
+    ref,
+    where('restaurantId', '==', restaurantId),
+    where('status', 'in', ['waiting', 'notified']),
+    orderBy('joinedAt', 'asc')
+  )
+  return onSnapshot(q, (snap) => {
+    callback(
+      snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        joinedAt:   (d.data().joinedAt as Timestamp)?.toDate?.()   ?? new Date(),
+        notifiedAt: (d.data().notifiedAt as Timestamp)?.toDate?.() ?? null,
+      })) as WaitlistEntry[]
+    )
+  })
+}
+
+export async function seatWaitlistEntry(id: string): Promise<void> {
+  await updateDoc(doc(requireDb(), 'waitlist', id), { status: 'seated' })
+}
+
+export async function removeWaitlistEntry(id: string): Promise<void> {
+  await updateDoc(doc(requireDb(), 'waitlist', id), { status: 'left' })
+}
+
+/** Fetch ALL reservations for a restaurant (used by guest directory) */
+export async function getAllReservations(restaurantId: string): Promise<Reservation[]> {
+  const ref  = collection(requireDb(), 'reservations')
+  const q    = query(ref, where('restaurantId', '==', restaurantId), orderBy('date', 'desc'))
+  const snap = await getDocs(q)
+  return snap.docs.map((d) => ({
+    id: d.id,
+    ...d.data(),
+    createdAt: (d.data().createdAt as Timestamp)?.toDate?.() ?? new Date(),
+  })) as Reservation[]
+}
+
 // ── Availability helper ───────────────────────────────────────
 
 export function getAvailabilityStatus(
