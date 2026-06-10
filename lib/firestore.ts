@@ -60,6 +60,13 @@ export async function getRestaurant(id: string): Promise<Restaurant | null> {
   } as Restaurant
 }
 
+export async function updateRestaurant(
+  id: string,
+  data: Partial<Omit<Restaurant, 'id' | 'createdAt'>>
+): Promise<void> {
+  await updateDoc(doc(requireDb(), 'restaurants', id), data)
+}
+
 // ── Tables ────────────────────────────────────────────────────
 
 export async function getRestaurantTables(restaurantId: string): Promise<RestaurantTable[]> {

@@ -4,6 +4,7 @@ import {
   signInWithEmailAndPassword,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  sendPasswordResetEmail,
   type User,
 } from 'firebase/auth'
 import { auth } from './firebase'
@@ -29,4 +30,9 @@ export function onAuthStateChange(callback: (user: User | null) => void): () => 
 
 export function getCurrentUser(): User | null {
   return auth?.currentUser ?? null
+}
+
+export async function sendPasswordReset(email: string): Promise<void> {
+  if (!auth) throw new Error('Firebase Auth not initialised')
+  await sendPasswordResetEmail(auth, email)
 }
