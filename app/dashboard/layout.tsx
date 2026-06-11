@@ -1,5 +1,11 @@
+import type { Metadata } from 'next'
 import AuthGuard from '@/components/dashboard/AuthGuard'
 import Sidebar   from '@/components/dashboard/Sidebar'
+
+export const metadata: Metadata = {
+  title: 'Dashboard — Meja',
+  description: 'Kelola reservasi, meja, dan tamu restoranmu.',
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   return (

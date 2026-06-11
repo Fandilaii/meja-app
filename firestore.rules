@@ -2,37 +2,45 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
+    // ── Restaurants ───────────────────────────────────────────
+    // Public read (discovery, detail page). Writes require manager role.
     match /restaurants/{restaurantId} {
-      // Anyone can read restaurant listings (guest discovery)
       allow read: if true;
-      // Only authenticated managers can modify restaurant data
-      allow write: if request.auth != null && request.auth.token.role == 'manager';
+      allow create, delete: if request.auth != null
+                            && request.auth.token.role == 'manager';
+      allow update: if request.auth != null;
 
+      // Tables: public read, any authenticated user can update status
       match /tables/{tableId} {
         allow read: if true;
-        // Any authenticated user (manager) can update table status
         allow write: if request.auth != null;
       }
     }
 
+    // ── Reservations ──────────────────────────────────────────
+    // Guests can create without an account (no login required to book).
+    // Authenticated managers can read and update (confirm, mark arrived, cancel).
+    // Nobody can delete reservations — they must be cancelled instead.
     match /reservations/{reservationId} {
-      // Guests can create reservations without an account
       allow create: if true;
-      // Managers (any auth'd user) can read and update reservations
-      // e.g. mark as arrived, cancel, confirm
       allow read, update: if request.auth != null;
+      allow delete: if false;
     }
 
+    // ── Waitlist ──────────────────────────────────────────────
+    // Guests can join without an account.
+    // Authenticated managers can read and update entries.
     match /waitlist/{waitlistId} {
-      // Guests can join the waitlist without an account
       allow create: if true;
-      // Managers can read and update waitlist entries
       allow read, update: if request.auth != null;
+      allow delete: if false;
     }
 
+    // ── Users ─────────────────────────────────────────────────
+    // Users can only read and write their own profile document.
     match /users/{userId} {
-      // Users can only read/write their own profile
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId;
     }
   }
 }
