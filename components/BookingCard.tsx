@@ -1,37 +1,54 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { CalendarDays, Users, Loader2, User, Phone } from 'lucide-react'
 import GuestPicker from './GuestPicker'
 import TimeSlotPicker from './TimeSlotPicker'
 import type { Restaurant, Reservation } from '@/types'
-import { generateTimeSlots, isSlotAvailable, createReservation } from '@/lib/firestore'
+import { generateTimeSlots, getReservationsForDate, createReservation } from '@/lib/firestore'
 import { addReservationId, saveGuestProfile, getGuestProfile } from '@/lib/localStorage'
 
 interface Props {
   restaurant: Restaurant
-  reservations: Reservation[]
 }
 
 function todayString(): string {
   return new Date().toISOString().split('T')[0]
 }
 
-export default function BookingCard({ restaurant, reservations }: Props) {
+export default function BookingCard({ restaurant }: Props) {
   const router = useRouter()
-  const [date, setDate]         = useState(todayString())
-  const [guestCount, setGuest]  = useState(2)
-  const [selectedSlot, setSlot] = useState<string | null>(null)
-  const [guestName, setName]    = useState(() => getGuestProfile()?.name  ?? '')
-  const [guestPhone, setPhone]  = useState(() => getGuestProfile()?.phone ?? '')
-  const [loading, setLoading]   = useState(false)
-  const [errors, setErrors]     = useState<{ name?: string; phone?: string }>({})
+  const [date, setDate]             = useState(todayString())
+  const [guestCount, setGuest]      = useState(2)
+  const [selectedSlot, setSlot]     = useState<string | null>(null)
+  const [guestName, setName]        = useState(() => getGuestProfile()?.name  ?? '')
+  const [guestPhone, setPhone]      = useState(() => getGuestProfile()?.phone ?? '')
+  const [loading, setLoading]       = useState(false)
+  const [slotsLoading, setSlotsLoading] = useState(false)
+  const [dateReservations, setDateRes]  = useState<Reservation[]>([])
+  const [errors, setErrors]         = useState<{ name?: string; phone?: string }>({})
+
+  useEffect(() => {
+    setSlotsLoading(true)
+    getReservationsForDate(restaurant.id, date).then((res) => {
+      setDateRes(res)
+      setSlotsLoading(false)
+    })
+  }, [restaurant.id, date])
 
   const slots = generateTimeSlots(restaurant.openTime, restaurant.closeTime)
-  const disabledSlots = slots.filter(
-    (slot) => !isSlotAvailable(slot, reservations, restaurant.totalTables)
-  )
+
+  const slotCounts = slots.reduce<Record<string, number>>((acc, slot) => {
+    acc[slot] = dateReservations.filter((r) => r.timeSlot === slot && r.status !== 'cancelled').length
+    return acc
+  }, {})
+
+  const disabledSlots  = slots.filter((s) => slotCounts[s] >= restaurant.totalTables)
+  const nearlyFullSlots = slots.filter((s) => {
+    const count = slotCounts[s]
+    return count >= Math.ceil(restaurant.totalTables * 0.7) && count < restaurant.totalTables
+  })
 
   function validate(): boolean {
     const e: { name?: string; phone?: string } = {}
@@ -159,12 +176,19 @@ export default function BookingCard({ restaurant, reservations }: Props) {
       {/* Time slots */}
       <div>
         <label className="block text-[11px] font-sans text-ink/60 mb-2">Pilih Waktu</label>
-        <TimeSlotPicker
-          slots={slots}
-          disabledSlots={disabledSlots}
-          selected={selectedSlot}
-          onChange={setSlot}
-        />
+        {slotsLoading ? (
+          <div className="flex items-center justify-center py-6">
+            <Loader2 size={18} className="animate-spin text-gold" />
+          </div>
+        ) : (
+          <TimeSlotPicker
+            slots={slots}
+            disabledSlots={disabledSlots}
+            nearlyFullSlots={nearlyFullSlots}
+            selected={selectedSlot}
+            onChange={setSlot}
+          />
+        )}
       </div>
 
       {/* CTA */}

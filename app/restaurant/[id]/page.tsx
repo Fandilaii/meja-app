@@ -11,7 +11,7 @@ import AvailabilityBadge from '@/components/AvailabilityBadge'
 import RestaurantCard from '@/components/RestaurantCard'
 import { getRestaurant, getRestaurants, getReservationsForDate, getAvailabilityStatus } from '@/lib/firestore'
 import { isSavedRestaurant, toggleSavedRestaurant } from '@/lib/localStorage'
-import type { Restaurant, Reservation, AvailabilityStatus } from '@/types'
+import type { Restaurant, AvailabilityStatus } from '@/types'
 
 function todayString(): string {
   return new Date().toISOString().split('T')[0]
@@ -22,7 +22,6 @@ export default function RestaurantDetailPage() {
   const router  = useRouter()
 
   const [restaurant,  setRestaurant]  = useState<Restaurant | null>(null)
-  const [reservations, setReservations] = useState<Reservation[]>([])
   const [availability, setAvailability] = useState<AvailabilityStatus>('Tersedia')
   const [similar,     setSimilar]     = useState<Restaurant[]>([])
   const [saved,       setSaved]       = useState(() => isSavedRestaurant(id))
@@ -38,7 +37,6 @@ export default function RestaurantDetailPage() {
         getReservationsForDate(r.id, todayString()),
         getRestaurants(r.area),
       ])
-      setReservations(res)
       setAvailability(getAvailabilityStatus(res.length, r.totalTables))
       setSimilar(
         areaRestaurants
@@ -128,7 +126,7 @@ export default function RestaurantDetailPage() {
 
       {/* Booking card */}
       <div className="px-4 py-5">
-        <BookingCard restaurant={restaurant} reservations={reservations} />
+        <BookingCard restaurant={restaurant} />
       </div>
 
       {/* Similar restaurants */}

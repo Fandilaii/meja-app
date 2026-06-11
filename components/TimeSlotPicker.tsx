@@ -3,16 +3,18 @@
 interface Props {
   slots: string[]
   disabledSlots: string[]
+  nearlyFullSlots?: string[]
   selected: string | null
   onChange: (slot: string) => void
 }
 
-export default function TimeSlotPicker({ slots, disabledSlots, selected, onChange }: Props) {
+export default function TimeSlotPicker({ slots, disabledSlots, nearlyFullSlots = [], selected, onChange }: Props) {
   return (
     <div className="grid grid-cols-3 gap-2">
       {slots.map((slot) => {
-        const disabled = disabledSlots.includes(slot)
-        const isSelected = selected === slot
+        const disabled    = disabledSlots.includes(slot)
+        const nearlyFull  = !disabled && nearlyFullSlots.includes(slot)
+        const isSelected  = selected === slot
 
         return (
           <button
@@ -22,13 +24,20 @@ export default function TimeSlotPicker({ slots, disabledSlots, selected, onChang
             onClick={() => onChange(slot)}
             className={`py-2 px-3 rounded-lg text-sm font-sans font-medium transition-colors
               ${disabled
-                ? 'bg-sand text-ink/60 cursor-not-allowed line-through decoration-muted/40'
+                ? 'bg-sand text-ink/30 cursor-not-allowed line-through'
                 : isSelected
                   ? 'bg-ink text-cream border border-ink'
-                  : 'bg-white border border-meja-border text-ink hover:border-gold'
+                  : nearlyFull
+                    ? 'bg-gold-light border border-gold/40 text-ink hover:border-gold'
+                    : 'bg-white border border-meja-border text-ink hover:border-gold'
               }`}
           >
             {slot}
+            {nearlyFull && !isSelected && (
+              <span className="block text-[9px] font-sans text-[#5C3E10] mt-0.5 leading-none">
+                Hampir penuh
+              </span>
+            )}
           </button>
         )
       })}
