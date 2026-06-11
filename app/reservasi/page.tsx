@@ -14,6 +14,30 @@ type Tab = 'upcoming' | 'past' | 'cancelled'
 
 function todayString() { return new Date().toISOString().split('T')[0] }
 
+function getUpcomingReminder(
+  reservations: Reservation[],
+  restaurants: Record<string, Restaurant>
+): { reservation: Reservation; restaurant: Restaurant } | null {
+  const now   = Date.now()
+  const in24h = now + 24 * 60 * 60 * 1000
+
+  const soonest = reservations
+    .filter((r) => r.status !== 'cancelled' && r.status !== 'arrived')
+    .map((r) => {
+      const [h, m]  = r.timeSlot.split(':').map(Number)
+      const [y, mo, d] = r.date.split('-').map(Number)
+      const dt = new Date(y, mo - 1, d, h, m).getTime()
+      return { reservation: r, dt }
+    })
+    .filter(({ dt }) => dt > now && dt <= in24h)
+    .sort((a, b) => a.dt - b.dt)[0]
+
+  if (!soonest) return null
+  const rest = restaurants[soonest.reservation.restaurantId]
+  if (!rest) return null
+  return { reservation: soonest.reservation, restaurant: rest }
+}
+
 function classifyReservation(r: Reservation): Tab {
   if (r.status === 'cancelled') return 'cancelled'
   if (r.status === 'arrived' || r.date < todayString()) return 'past'
@@ -91,6 +115,21 @@ export default function ReservasiPage() {
           )
         })}
       </div>
+
+      {/* 24h reminder banner */}
+      {activeTab === 'upcoming' && (() => {
+        const reminder = getUpcomingReminder(reservations, restaurantMap)
+        if (!reminder) return null
+        return (
+          <div className="mx-4 mb-2 px-4 py-3 rounded-2xl bg-gold-light border border-gold/30 flex items-start gap-3">
+            <span className="text-lg leading-none mt-0.5">⏰</span>
+            <p className="text-sm font-sans text-[#5C3E10]">
+              Reservasimu jam <strong>{reminder.reservation.timeSlot}</strong> di{' '}
+              <strong>{reminder.restaurant.name}</strong> kurang dari 24 jam lagi. Jangan lupa!
+            </p>
+          </div>
+        )
+      })()}
 
       {/* Content */}
       <div className="px-4 space-y-3">

@@ -8,7 +8,8 @@ import Image from 'next/image'
 import { ArrowLeft, Heart, Star, Clock, MapPin } from 'lucide-react'
 import BookingCard from '@/components/BookingCard'
 import AvailabilityBadge from '@/components/AvailabilityBadge'
-import { getRestaurant, getReservationsForDate, getAvailabilityStatus } from '@/lib/firestore'
+import RestaurantCard from '@/components/RestaurantCard'
+import { getRestaurant, getRestaurants, getReservationsForDate, getAvailabilityStatus } from '@/lib/firestore'
 import { isSavedRestaurant, toggleSavedRestaurant } from '@/lib/localStorage'
 import type { Restaurant, Reservation, AvailabilityStatus } from '@/types'
 
@@ -20,11 +21,12 @@ export default function RestaurantDetailPage() {
   const { id }  = useParams<{ id: string }>()
   const router  = useRouter()
 
-  const [restaurant, setRestaurant]     = useState<Restaurant | null>(null)
+  const [restaurant,  setRestaurant]  = useState<Restaurant | null>(null)
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [availability, setAvailability] = useState<AvailabilityStatus>('Tersedia')
-  const [saved, setSaved]               = useState(() => isSavedRestaurant(id))
-  const [loading, setLoading]           = useState(true)
+  const [similar,     setSimilar]     = useState<Restaurant[]>([])
+  const [saved,       setSaved]       = useState(() => isSavedRestaurant(id))
+  const [loading,     setLoading]     = useState(true)
 
   useEffect(() => {
     async function load() {
@@ -32,9 +34,18 @@ export default function RestaurantDetailPage() {
       if (!r) { router.push('/'); return }
       setRestaurant(r)
 
-      const res = await getReservationsForDate(r.id, todayString())
+      const [res, areaRestaurants] = await Promise.all([
+        getReservationsForDate(r.id, todayString()),
+        getRestaurants(r.area),
+      ])
       setReservations(res)
       setAvailability(getAvailabilityStatus(res.length, r.totalTables))
+      setSimilar(
+        areaRestaurants
+          .filter((s) => s.id !== id)
+          .sort((a, b) => b.rating - a.rating)
+          .slice(0, 3)
+      )
       setLoading(false)
     }
     load()
@@ -119,6 +130,24 @@ export default function RestaurantDetailPage() {
       <div className="px-4 py-5">
         <BookingCard restaurant={restaurant} reservations={reservations} />
       </div>
+
+      {/* Similar restaurants */}
+      {similar.length > 0 && (
+        <div className="px-4 pb-8">
+          <h2 className="font-display font-semibold text-ink text-base mb-3">
+            Kamu juga mungkin suka
+          </h2>
+          <div className="space-y-3">
+            {similar.map((s) => (
+              <RestaurantCard
+                key={s.id}
+                restaurant={s}
+                availability="Tersedia"
+              />
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
