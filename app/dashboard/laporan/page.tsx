@@ -3,10 +3,31 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useMemo } from 'react'
-import { Loader2 } from 'lucide-react'
-import { getAllReservations } from '@/lib/firestore'
+import { Loader2, Download } from 'lucide-react'
+import { getAllReservations, getRestaurantTables } from '@/lib/firestore'
 import StatCard from '@/components/dashboard/StatCard'
-import type { Reservation } from '@/types'
+import type { Reservation, RestaurantTable } from '@/types'
+
+function downloadCSV(reservations: Reservation[], tables: RestaurantTable[], filename: string) {
+  const tableMap = new Map(tables.map((t) => [t.id, t.tableNumber]))
+  const headers  = ['Kode', 'Tanggal', 'Waktu', 'Nama Tamu', 'Telepon', 'Jumlah Tamu', 'Meja', 'Status']
+  const rows = reservations.map((r) => [
+    r.referenceCode,
+    r.date,
+    r.timeSlot,
+    `"${r.guestName.replace(/"/g, '""')}"`,
+    r.guestPhone,
+    r.guestCount,
+    r.tableId !== 'auto' ? (tableMap.get(r.tableId) ?? r.tableId) : '-',
+    r.status,
+  ])
+  const csv  = [headers, ...rows].map((row) => row.join(',')).join('\n')
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
+  const url  = URL.createObjectURL(blob)
+  const a    = document.createElement('a')
+  a.href = url; a.download = filename; a.click()
+  URL.revokeObjectURL(url)
+}
 
 const RESTAURANT_ID = 'P3R1nyDl8sqYukKkculP'
 
@@ -99,11 +120,16 @@ function shortDate(dateStr: string): string {
 export default function LaporanPage() {
   const [range,        setRange]        = useState<Range>('month')
   const [reservations, setReservations] = useState<Reservation[]>([])
+  const [tables,       setTables]       = useState<RestaurantTable[]>([])
   const [loading,      setLoading]      = useState(true)
 
   useEffect(() => {
-    getAllReservations(RESTAURANT_ID).then((data) => {
-      setReservations(data)
+    Promise.all([
+      getAllReservations(RESTAURANT_ID),
+      getRestaurantTables(RESTAURANT_ID),
+    ]).then(([res, tbls]) => {
+      setReservations(res)
+      setTables(tbls)
       setLoading(false)
     })
   }, [])
@@ -142,8 +168,24 @@ export default function LaporanPage() {
           </p>
         </div>
 
-        {/* Range selector */}
-        <div className="flex gap-1 bg-sand rounded-xl p-1">
+        <div className="flex items-center gap-3">
+          {/* CSV export */}
+          {!loading && (
+            <button
+              onClick={() => downloadCSV(
+                current,
+                tables,
+                `meja-laporan-${RANGE_LABELS[range].toLowerCase().replace(/\s/g, '-')}.csv`
+              )}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-meja-border text-sm font-sans text-ink/60 hover:bg-sand transition-colors"
+            >
+              <Download size={14} />
+              Unduh CSV
+            </button>
+          )}
+
+          {/* Range selector */}
+          <div className="flex gap-1 bg-sand rounded-xl p-1">
           {(Object.keys(RANGE_LABELS) as Range[]).map((r) => (
             <button
               key={r}
@@ -157,6 +199,7 @@ export default function LaporanPage() {
               {RANGE_LABELS[r]}
             </button>
           ))}
+          </div>
         </div>
       </div>
 

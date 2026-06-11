@@ -3,12 +3,13 @@
 export const dynamic = 'force-dynamic'
 
 import { useEffect, useState } from 'react'
-import { CheckCheck, Clock, Users } from 'lucide-react'
+import { CheckCheck, Clock, Users, ClipboardList } from 'lucide-react'
 import StatCard from '@/components/dashboard/StatCard'
 import BookingTimeline from '@/components/dashboard/BookingTimeline'
 import TableMap from '@/components/dashboard/TableMap'
 import WaitlistPanel from '@/components/dashboard/WaitlistPanel'
 import WalkInModal from '@/components/dashboard/WalkInModal'
+import BriefingModal from '@/components/dashboard/BriefingModal'
 import {
   subscribeToTables,
   subscribeToWaitlist,
@@ -45,8 +46,9 @@ export default function DashboardPage() {
   const [reservations, setReservations] = useState<Reservation[]>([])
   const [waitlist,     setWaitlist]     = useState<WaitlistEntry[]>([])
   const [now,          setNow]          = useState(new Date())
-  const [confirming,   setConfirming]   = useState(false)
-  const [showWalkIn,   setShowWalkIn]   = useState(false)
+  const [confirming,    setConfirming]    = useState(false)
+  const [showWalkIn,    setShowWalkIn]    = useState(false)
+  const [showBriefing,  setShowBriefing]  = useState(false)
 
   useEffect(() => {
     const unsubT = subscribeToTables(RESTAURANT_ID, setTables)
@@ -98,6 +100,13 @@ export default function DashboardPage() {
             <span className="w-2 h-2 rounded-full bg-forest animate-pulse" />
             <span className="text-xs font-sans text-ink/60">Live</span>
           </div>
+          <button
+            onClick={() => setShowBriefing(true)}
+            className="flex items-center gap-2 px-4 py-2 rounded-[9999px] border border-meja-border bg-white text-ink text-sm font-sans font-medium hover:bg-sand transition-colors"
+          >
+            <ClipboardList size={14} />
+            Briefing
+          </button>
           <button
             onClick={() => setShowWalkIn(true)}
             className="flex items-center gap-2 px-4 py-2 rounded-[9999px] bg-ink text-cream text-sm font-sans font-medium hover:bg-gold-dark transition-colors"
@@ -255,6 +264,15 @@ export default function DashboardPage() {
           restaurantId={RESTAURANT_ID}
           tables={tables}
           onClose={() => setShowWalkIn(false)}
+        />
+      )}
+
+      {showBriefing && (
+        <BriefingModal
+          restaurantId={RESTAURANT_ID}
+          reservations={reservations}
+          tables={tables}
+          onClose={() => setShowBriefing(false)}
         />
       )}
     </div>
