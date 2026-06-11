@@ -36,6 +36,12 @@ service cloud.firestore {
       allow delete: if false;
     }
 
+    // ── Guest Notes ───────────────────────────────────────────
+    // Manager-only: notes about guests (allergies, preferences, VIP flags).
+    match /guestNotes/{noteId} {
+      allow read, write: if request.auth != null;
+    }
+
     // ── Users ─────────────────────────────────────────────────
     // Users can only read and write their own profile document.
     match /users/{userId} {

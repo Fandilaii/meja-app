@@ -4,28 +4,32 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback } from 'react'
 import { ChevronLeft, ChevronRight, X, Loader2, Phone } from 'lucide-react'
-import { getReservationsForDate, updateReservationStatus } from '@/lib/firestore'
-import type { Reservation } from '@/types'
+import {
+  getReservationsForDate,
+  getRestaurantTables,
+  updateReservationStatus,
+  assignTableToReservation,
+} from '@/lib/firestore'
+import type { Reservation, RestaurantTable } from '@/types'
 
 const RESTAURANT_ID = 'P3R1nyDl8sqYukKkculP'
 
-const DAYS_ID  = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
+const DAYS_ID   = ['Min', 'Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab']
 const MONTHS_ID = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des']
 
 const STATUS_CONFIG = {
-  pending:   { bg: 'bg-gold-light',   text: 'text-[#5C3E10]', label: 'Menunggu'      },
-  confirmed: { bg: 'bg-forest-light', text: 'text-forest',    label: 'Dikonfirmasi'  },
-  arrived:   { bg: 'bg-sand',         text: 'text-ink/60',    label: 'Hadir'         },
-  cancelled: { bg: 'bg-terra-light',  text: 'text-[#7A2E12]', label: 'Dibatalkan'    },
+  pending:   { bg: 'bg-gold-light',   text: 'text-[#5C3E10]', label: 'Menunggu'     },
+  confirmed: { bg: 'bg-forest-light', text: 'text-forest',    label: 'Dikonfirmasi' },
+  arrived:   { bg: 'bg-sand',         text: 'text-ink/60',    label: 'Hadir'        },
+  cancelled: { bg: 'bg-terra-light',  text: 'text-[#7A2E12]', label: 'Dibatalkan'   },
 } as const
 
 function toDateStr(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-/** Monday of the week containing `d` */
 function weekStart(d: Date): Date {
-  const day = d.getDay() // 0=Sun
+  const day  = d.getDay()
   const diff = day === 0 ? -6 : 1 - day
   const mon  = new Date(d)
   mon.setDate(d.getDate() + diff)
@@ -39,26 +43,24 @@ function addDays(d: Date, n: number): Date {
   return r
 }
 
-function formatDate(d: Date): string {
-  return `${DAYS_ID[d.getDay()]}, ${d.getDate()} ${MONTHS_ID[d.getMonth()]}`
-}
-
 export default function KalenderPage() {
   const today = new Date()
   today.setHours(0, 0, 0, 0)
 
-  const [monDate,    setMonDate]    = useState<Date>(() => weekStart(today))
-  const [weekData,   setWeekData]   = useState<Record<string, Reservation[]>>({})
-  const [weekLoading, setWeekLoading] = useState(true)
-  const [selected,   setSelected]   = useState<Reservation | null>(null)
-  const [updating,   setUpdating]   = useState(false)
+  const [monDate,        setMonDate]        = useState<Date>(() => weekStart(today))
+  const [weekData,       setWeekData]       = useState<Record<string, Reservation[]>>({})
+  const [weekLoading,    setWeekLoading]    = useState(true)
+  const [selected,       setSelected]       = useState<Reservation | null>(null)
+  const [updating,       setUpdating]       = useState(false)
+  const [tables,         setTables]         = useState<RestaurantTable[]>([])
+  const [assigningTable, setAssigningTable] = useState<string | null>(null)
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(monDate, i))
   const weekLabel = `${monDate.getDate()} ${MONTHS_ID[monDate.getMonth()]} – ${addDays(monDate, 6).getDate()} ${MONTHS_ID[addDays(monDate, 6).getMonth()]} ${addDays(monDate, 6).getFullYear()}`
 
   const loadWeek = useCallback(async (mon: Date) => {
     setWeekLoading(true)
-    const days = Array.from({ length: 7 }, (_, i) => addDays(mon, i))
+    const days    = Array.from({ length: 7 }, (_, i) => addDays(mon, i))
     const results = await Promise.all(
       days.map((d) => getReservationsForDate(RESTAURANT_ID, toDateStr(d)))
     )
@@ -70,6 +72,10 @@ export default function KalenderPage() {
 
   useEffect(() => { loadWeek(monDate) }, [monDate, loadWeek])
 
+  useEffect(() => {
+    getRestaurantTables(RESTAURANT_ID).then(setTables)
+  }, [])
+
   function prevWeek() { setMonDate((d) => addDays(d, -7)) }
   function nextWeek() { setMonDate((d) => addDays(d, +7)) }
   function goToday()  { setMonDate(weekStart(today)) }
@@ -79,7 +85,6 @@ export default function KalenderPage() {
     setUpdating(true)
     try {
       await updateReservationStatus(selected.id, status)
-      // Update locally
       const dateStr = selected.date
       setWeekData((prev) => ({
         ...prev,
@@ -90,6 +95,25 @@ export default function KalenderPage() {
       setSelected((s) => s ? { ...s, status } : null)
     } finally {
       setUpdating(false)
+    }
+  }
+
+  async function handleAssignTable(tableId: string) {
+    if (!selected) return
+    setAssigningTable(tableId)
+    try {
+      await assignTableToReservation(selected.id, tableId, RESTAURANT_ID, selected.tableId)
+      setWeekData((prev) => ({
+        ...prev,
+        [selected.date]: prev[selected.date]?.map((r) =>
+          r.id === selected.id ? { ...r, tableId } : r
+        ) ?? [],
+      }))
+      setSelected((s) => s ? { ...s, tableId } : null)
+      const fresh = await getRestaurantTables(RESTAURANT_ID)
+      setTables(fresh)
+    } finally {
+      setAssigningTable(null)
     }
   }
 
@@ -129,22 +153,16 @@ export default function KalenderPage() {
       {/* Calendar grid */}
       <div className="flex gap-3 flex-1 overflow-x-auto pb-2">
         {weekDays.map((day) => {
-          const dateStr    = toDateStr(day)
-          const isToday    = dateStr === toDateStr(today)
+          const dateStr      = toDateStr(day)
+          const isToday      = dateStr === toDateStr(today)
           const reservations = weekData[dateStr] ?? []
-          const isPast     = day < today
+          const isPast       = day < today
 
           return (
             <div key={dateStr} className="flex-1 min-w-[140px] flex flex-col gap-2">
-              {/* Day header */}
-              <div className={`rounded-xl px-3 py-2.5 text-center border
-                ${isToday
-                  ? 'bg-ink border-ink'
-                  : isPast
-                    ? 'bg-white/50 border-meja-border'
-                    : 'bg-white border-meja-border'
-                }`}
-              >
+              <div className={`rounded-xl px-3 py-2.5 text-center border ${
+                isToday ? 'bg-ink border-ink' : isPast ? 'bg-white/50 border-meja-border' : 'bg-white border-meja-border'
+              }`}>
                 <p className={`text-[11px] font-sans font-medium ${isToday ? 'text-gold' : 'text-ink/50'}`}>
                   {DAYS_ID[day.getDay()]}
                 </p>
@@ -156,7 +174,6 @@ export default function KalenderPage() {
                 </p>
               </div>
 
-              {/* Reservation chips */}
               {weekLoading ? (
                 <div className="flex-1 flex items-start justify-center pt-4">
                   <Loader2 size={14} className="animate-spin text-ink/30" />
@@ -170,7 +187,8 @@ export default function KalenderPage() {
                   {reservations
                     .sort((a, b) => a.timeSlot.localeCompare(b.timeSlot))
                     .map((r) => {
-                      const cfg = STATUS_CONFIG[r.status] ?? STATUS_CONFIG.pending
+                      const cfg           = STATUS_CONFIG[r.status] ?? STATUS_CONFIG.pending
+                      const assignedTable = tables.find((t) => t.id === r.tableId)
                       return (
                         <button
                           key={r.id}
@@ -181,7 +199,14 @@ export default function KalenderPage() {
                         >
                           <p className={`text-[11px] font-sans font-semibold ${cfg.text}`}>{r.timeSlot}</p>
                           <p className={`text-[10px] font-sans truncate ${cfg.text} opacity-80`}>{r.guestName}</p>
-                          <p className={`text-[9px] font-sans ${cfg.text} opacity-60`}>{r.guestCount} tamu</p>
+                          <div className="flex items-center justify-between mt-0.5">
+                            <p className={`text-[9px] font-sans ${cfg.text} opacity-60`}>{r.guestCount} tamu</p>
+                            {assignedTable && (
+                              <span className={`text-[9px] font-mono font-bold ${cfg.text}`}>
+                                {assignedTable.tableNumber}
+                              </span>
+                            )}
+                          </div>
                         </button>
                       )
                     })}
@@ -195,7 +220,6 @@ export default function KalenderPage() {
       {/* Detail side panel */}
       {selected && (
         <div className="fixed inset-y-0 right-0 w-80 bg-white border-l border-meja-border shadow-2xl flex flex-col z-50">
-          {/* Panel header */}
           <div className="flex items-center justify-between px-5 pt-5 pb-4 border-b border-meja-border">
             <h2 className="font-display font-semibold text-ink text-base">Detail Reservasi</h2>
             <button
@@ -206,7 +230,6 @@ export default function KalenderPage() {
             </button>
           </div>
 
-          {/* Status badge */}
           <div className="px-5 pt-4">
             {(() => {
               const cfg = STATUS_CONFIG[selected.status] ?? STATUS_CONFIG.pending
@@ -218,17 +241,16 @@ export default function KalenderPage() {
             })()}
           </div>
 
-          {/* Details */}
           <div className="px-5 py-4 space-y-4 flex-1 overflow-y-auto">
             {[
-              { label: 'Tamu',     value: selected.guestName },
-              { label: 'Tanggal',  value: (() => {
+              { label: 'Tamu',    value: selected.guestName },
+              { label: 'Tanggal', value: (() => {
                 const [y, m, d] = selected.date.split('-').map(Number)
                 return new Date(y, m - 1, d).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
               })() },
-              { label: 'Waktu',    value: `${selected.timeSlot} WIB` },
-              { label: 'Jumlah',   value: `${selected.guestCount} orang` },
-              { label: 'Kode',     value: selected.referenceCode, mono: true },
+              { label: 'Waktu',   value: `${selected.timeSlot} WIB` },
+              { label: 'Jumlah',  value: `${selected.guestCount} orang` },
+              { label: 'Kode',    value: selected.referenceCode, mono: true },
             ].map(({ label, value, mono }) => (
               <div key={label}>
                 <p className="text-[10px] font-sans text-ink/50 uppercase tracking-wider mb-0.5">{label}</p>
@@ -236,7 +258,6 @@ export default function KalenderPage() {
               </div>
             ))}
 
-            {/* WhatsApp link */}
             {selected.guestPhone && (
               <div>
                 <p className="text-[10px] font-sans text-ink/50 uppercase tracking-wider mb-0.5">WhatsApp</p>
@@ -251,6 +272,53 @@ export default function KalenderPage() {
                 </a>
               </div>
             )}
+
+            {/* ── Table Assignment ── */}
+            <div>
+              <p className="text-[10px] font-sans text-ink/50 uppercase tracking-wider mb-2">Pilih Meja</p>
+              {tables.length === 0 ? (
+                <p className="text-xs font-sans text-ink/40">Belum ada meja terdaftar.</p>
+              ) : (
+                <div className="flex flex-wrap gap-1.5">
+                  {tables.map((t) => {
+                    const isAssigned = selected.tableId === t.id
+                    const isAvail    = t.status === 'available' || isAssigned
+                    const isBusy     = assigningTable === t.id
+                    return (
+                      <button
+                        key={t.id}
+                        onClick={() => { if (isAvail && !assigningTable) handleAssignTable(t.id) }}
+                        disabled={(!isAvail && !isAssigned) || !!assigningTable}
+                        title={!isAvail && !isAssigned ? `Meja ${t.tableNumber} ${t.status === 'reserved' ? 'dipesan' : 'terisi'}` : undefined}
+                        className={`flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-[11px] font-sans font-medium border transition-colors
+                          ${isAssigned
+                            ? 'bg-ink text-cream border-ink'
+                            : isAvail
+                              ? 'bg-forest-light text-forest border-forest/30 hover:bg-forest/20'
+                              : 'bg-sand text-ink/30 border-meja-border cursor-not-allowed'
+                          }
+                          ${!!assigningTable && !isBusy ? 'opacity-50' : ''}`}
+                      >
+                        {isBusy
+                          ? <Loader2 size={10} className="animate-spin" />
+                          : <span>{t.tableNumber}</span>
+                        }
+                        <span className="opacity-60 text-[9px]">{t.capacity}p</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+              {selected.tableId !== 'auto' && (
+                <button
+                  onClick={() => { if (!assigningTable) handleAssignTable('auto') }}
+                  disabled={!!assigningTable}
+                  className="mt-2 text-[10px] font-sans text-ink/40 hover:text-terra transition-colors disabled:opacity-40"
+                >
+                  × Lepas penugasan meja
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Action buttons */}

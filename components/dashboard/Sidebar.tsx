@@ -5,7 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import {
   LayoutDashboard, Calendar, Grid3X3, Users, BarChart3,
-  Settings, ListOrdered, ChevronRight, LogOut,
+  Settings, ListOrdered, ChevronRight, LogOut, Map,
 } from 'lucide-react'
 import { getRestaurant } from '@/lib/firestore'
 import { signOut, onAuthStateChange } from '@/lib/auth'
@@ -17,6 +17,7 @@ const RESTAURANT_ID = 'P3R1nyDl8sqYukKkculP'
 const NAV_ITEMS = [
   { href: '/dashboard',            label: 'Dashboard',  Icon: LayoutDashboard },
   { href: '/dashboard/kalender',   label: 'Kalender',   Icon: Calendar        },
+  { href: '/dashboard/floor',      label: 'Lantai',     Icon: Map             },
   { href: '/dashboard/meja',       label: 'Meja',       Icon: Grid3X3         },
   { href: '/dashboard/waitlist',   label: 'Waitlist',   Icon: ListOrdered     },
   { href: '/dashboard/tamu',       label: 'Tamu',       Icon: Users           },

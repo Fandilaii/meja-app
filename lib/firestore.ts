@@ -4,6 +4,7 @@ import {
   getDocs,
   getDoc,
   addDoc,
+  setDoc,
   updateDoc,
   deleteDoc,
   query,
@@ -142,6 +143,30 @@ export async function getReservationsForDate(
   })) as Reservation[]
 }
 
+/** Real-time listener for today's reservations */
+export function subscribeToReservationsForDate(
+  restaurantId: string,
+  date: string,
+  callback: (reservations: Reservation[]) => void
+): Unsubscribe {
+  const ref = collection(requireDb(), 'reservations')
+  const q   = query(
+    ref,
+    where('restaurantId', '==', restaurantId),
+    where('date', '==', date),
+    where('status', 'in', ['pending', 'confirmed', 'arrived'])
+  )
+  return onSnapshot(q, (snap) => {
+    callback(
+      snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        createdAt: (d.data().createdAt as Timestamp)?.toDate?.() ?? new Date(),
+      })) as Reservation[]
+    )
+  })
+}
+
 export async function getReservation(id: string): Promise<Reservation | null> {
   const ref  = doc(requireDb(), 'reservations', id)
   const snap = await getDoc(ref)
@@ -200,6 +225,28 @@ export async function updateReservationStatus(
   status: Reservation['status']
 ): Promise<void> {
   await updateDoc(doc(requireDb(), 'reservations', id), { status })
+}
+
+/** Assign a table to a reservation, releasing the previous assignment */
+export async function assignTableToReservation(
+  reservationId: string,
+  newTableId: string,
+  restaurantId: string,
+  prevTableId?: string
+): Promise<void> {
+  if (prevTableId && prevTableId !== 'auto' && prevTableId !== newTableId) {
+    await updateDoc(
+      doc(requireDb(), 'restaurants', restaurantId, 'tables', prevTableId),
+      { status: 'available' }
+    )
+  }
+  await updateDoc(doc(requireDb(), 'reservations', reservationId), { tableId: newTableId })
+  if (newTableId !== 'auto') {
+    await updateDoc(
+      doc(requireDb(), 'restaurants', restaurantId, 'tables', newTableId),
+      { status: 'reserved' }
+    )
+  }
 }
 
 // ── Waitlist ──────────────────────────────────────────────────
@@ -281,6 +328,37 @@ export async function getAllReservations(restaurantId: string): Promise<Reservat
     ...d.data(),
     createdAt: (d.data().createdAt as Timestamp)?.toDate?.() ?? new Date(),
   })) as Reservation[]
+}
+
+// ── Guest Notes ───────────────────────────────────────────────
+
+function guestNoteId(restaurantId: string, guestPhone: string): string {
+  return `${restaurantId}_${guestPhone.replace(/\D/g, '')}`
+}
+
+/** Fetch all notes for a restaurant in one query */
+export async function getAllGuestNotes(restaurantId: string): Promise<Record<string, string>> {
+  const ref  = collection(requireDb(), 'guestNotes')
+  const q    = query(ref, where('restaurantId', '==', restaurantId))
+  const snap = await getDocs(q)
+  const result: Record<string, string> = {}
+  snap.docs.forEach((d) => {
+    result[d.data().guestPhone as string] = d.data().note as string
+  })
+  return result
+}
+
+export async function saveGuestNote(
+  restaurantId: string,
+  guestPhone: string,
+  note: string
+): Promise<void> {
+  const id = guestNoteId(restaurantId, guestPhone)
+  await setDoc(
+    doc(requireDb(), 'guestNotes', id),
+    { restaurantId, guestPhone, note, updatedAt: serverTimestamp() },
+    { merge: true }
+  )
 }
 
 // ── Availability helper ───────────────────────────────────────
