@@ -89,21 +89,29 @@ export default function ReservationCard({ reservation, restaurant, tab, onCancel
 
           {tab === 'upcoming' && onCancel && (
             confirming ? (
-              <div className="flex gap-1.5">
-                <button
-                  onClick={() => setConfirming(false)}
-                  className="px-3 py-2 rounded-[9999px] border border-meja-border text-sm font-sans text-ink/60 hover:bg-sand transition-colors"
-                >
-                  Batal
-                </button>
-                <button
-                  onClick={handleCancel}
-                  disabled={cancelling}
-                  className="px-3 py-2 rounded-[9999px] bg-terra text-white text-sm font-sans font-medium hover:bg-terra/90 transition-colors flex items-center gap-1.5 disabled:opacity-60"
-                >
-                  {cancelling && <Loader2 size={13} className="animate-spin" />}
-                  Yakin
-                </button>
+              <div className="flex-1 space-y-2">
+                <p className="text-[11px] font-sans text-ink/70 leading-relaxed">
+                  Batalkan reservasi di{' '}
+                  <span className="font-semibold text-ink">{restaurant?.name ?? 'restoran ini'}</span>{' '}
+                  pada <span className="font-semibold text-ink">{formatDate(reservation.date)}</span>{' '}
+                  jam <span className="font-semibold text-ink">{reservation.timeSlot}</span>?
+                </p>
+                <div className="flex gap-1.5">
+                  <button
+                    onClick={() => setConfirming(false)}
+                    className="px-3 py-2 rounded-[9999px] border border-meja-border text-sm font-sans text-ink/60 hover:bg-sand transition-colors"
+                  >
+                    Tidak
+                  </button>
+                  <button
+                    onClick={handleCancel}
+                    disabled={cancelling}
+                    className="px-3 py-2 rounded-[9999px] bg-terra text-white text-sm font-sans font-medium hover:bg-terra/90 transition-colors flex items-center gap-1.5 disabled:opacity-60"
+                  >
+                    {cancelling && <Loader2 size={13} className="animate-spin" />}
+                    Ya, Batalkan
+                  </button>
+                </div>
               </div>
             ) : (
               <button

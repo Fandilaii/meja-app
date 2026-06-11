@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic'
 import { useEffect, useState } from 'react'
 import BottomNav from '@/components/BottomNav'
 import ReservationCard from '@/components/ReservationCard'
-import { getReservationsByIds, getRestaurant, updateReservationStatus } from '@/lib/firestore'
+import { getReservationsByIds, getRestaurant, updateReservationStatus, updateTableStatus } from '@/lib/firestore'
 import { getReservationIds } from '@/lib/localStorage'
 import type { Reservation, Restaurant } from '@/types'
 import Link from 'next/link'
@@ -75,7 +75,11 @@ export default function ReservasiPage() {
   }, [])
 
   async function handleCancel(id: string) {
+    const res = reservations.find((r) => r.id === id)
     await updateReservationStatus(id, 'cancelled')
+    if (res && res.tableId && res.tableId !== 'auto') {
+      await updateTableStatus(res.restaurantId, res.tableId, 'available')
+    }
     setReservations((prev) =>
       prev.map((r) => r.id === id ? { ...r, status: 'cancelled' } : r)
     )
