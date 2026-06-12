@@ -4,9 +4,22 @@ export const dynamic = 'force-dynamic'
 
 import { useEffect, useState } from 'react'
 import { useParams, useRouter } from 'next/navigation'
-import { Check, Copy, CheckCheck, Share2 } from 'lucide-react'
+import Link from 'next/link'
+import { Check, Copy, CheckCheck, Share2, CalendarPlus, Download, QrCode } from 'lucide-react'
+import QRCodeLib from 'qrcode'
 import { getReservation, getRestaurant } from '@/lib/firestore'
+import { buildGoogleCalendarUrl, downloadICS } from '@/lib/calendar'
 import type { Reservation, Restaurant } from '@/types'
+
+function BookingQR({ code }: { code: string }) {
+  const [src, setSrc] = useState('')
+  useEffect(() => {
+    QRCodeLib.toDataURL(code, { width: 160, margin: 1, color: { dark: '#0F0E0D', light: '#FAFAF8' } })
+      .then(setSrc)
+  }, [code])
+  if (!src) return <div className="w-40 h-40 rounded-xl bg-sand animate-pulse mx-auto" />
+  return <img src={src} alt={`QR ${code}`} className="w-40 h-40 rounded-xl mx-auto" />
+}
 
 function formatDate(dateStr: string): string {
   const [year, month, day] = dateStr.split('-').map(Number)
@@ -175,6 +188,51 @@ export default function ConfirmationPage() {
             </button>
           </div>
         </div>
+
+        {/* QR Code */}
+        <div className="bg-white rounded-2xl border border-meja-border p-5 text-center">
+          <div className="flex items-center justify-center gap-1.5 mb-3">
+            <QrCode size={13} className="text-ink/50" />
+            <p className="text-[11px] font-sans text-ink/50 uppercase tracking-wider">Tunjukkan saat tiba</p>
+          </div>
+          <BookingQR code={reservation.referenceCode} />
+          <p className="text-[10px] font-sans text-ink/40 mt-3">
+            Staf akan memindai kode ini untuk memverifikasi reservasimu
+          </p>
+        </div>
+
+        {/* Add to Calendar */}
+        <div className="bg-white rounded-2xl border border-meja-border p-4">
+          <p className="text-[11px] font-sans text-ink/50 uppercase tracking-wider mb-3 flex items-center gap-1.5">
+            <CalendarPlus size={13} />
+            Tambah ke Kalender
+          </p>
+          <div className="flex gap-2">
+            <a
+              href={buildGoogleCalendarUrl(reservation, restaurant.name)}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex-1 py-2.5 rounded-xl border border-meja-border text-center text-sm font-sans font-medium text-ink hover:bg-sand transition-colors"
+            >
+              Google Calendar
+            </a>
+            <button
+              onClick={() => downloadICS(reservation, restaurant.name)}
+              className="flex-1 py-2.5 rounded-xl border border-meja-border text-center text-sm font-sans font-medium text-ink hover:bg-sand transition-colors flex items-center justify-center gap-1.5"
+            >
+              <Download size={13} />
+              Simpan .ics
+            </button>
+          </div>
+        </div>
+
+        {/* View reservations */}
+        <Link
+          href="/reservasi"
+          className="w-full py-3 rounded-[9999px] text-sm font-sans font-medium text-ink/70 border border-meja-border hover:bg-sand transition-colors flex items-center justify-center"
+        >
+          Lihat Reservasi Saya
+        </Link>
 
         {/* WhatsApp CTA */}
         <button
