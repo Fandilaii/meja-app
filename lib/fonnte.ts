@@ -14,6 +14,22 @@ export async function sendWhatsApp(phone: string, message: string) {
   return response.json()
 }
 
+export function buildReminderMessage(params: {
+  name:           string
+  restaurantName: string
+  date:           string
+  timeSlot:       string
+  guestCount:     number
+  referenceCode:  string
+}): string {
+  const { name, restaurantName, date, timeSlot, guestCount, referenceCode } = params
+  const [y, m, d] = date.split('-').map(Number)
+  const dateLabel = new Date(y, m - 1, d).toLocaleDateString('id-ID', {
+    weekday: 'long', day: 'numeric', month: 'long',
+  })
+  return `Halo ${name}! 👋\n\nMengingatkan reservasimu *besok*:\n\n🍽️ *${restaurantName}*\n📅 ${dateLabel}\n⏰ ${timeSlot} WIB\n👥 ${guestCount} orang\n\nKode: *${referenceCode}*\n\nSampai jumpa! Mejamu sudah menunggu. 🪑\n— Tim Meja`
+}
+
 export function buildConfirmationMessage(params: {
   name:           string
   restaurantName: string
