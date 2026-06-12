@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import Link from 'next/link'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Star } from 'lucide-react'
 import type { Reservation, Restaurant } from '@/types'
 
 interface Props {
@@ -76,6 +76,39 @@ export default function ReservationCard({ reservation, restaurant, tab, onCancel
           </div>
         ))}
       </div>
+
+      {/* Rating (past reservations) */}
+      {tab === 'past' && reservation.rating != null && (
+        <div className="px-4 pb-3 flex items-center gap-1.5">
+          <div className="flex items-center gap-0.5">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <Star
+                key={n}
+                size={12}
+                className={n <= reservation.rating! ? 'fill-gold text-gold' : 'text-ink/20'}
+              />
+            ))}
+          </div>
+          {reservation.reviewText && (
+            <p className="text-[11px] font-sans text-ink/60 truncate ml-1">
+              "{reservation.reviewText}"
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Rate CTA for arrived reservations without a rating */}
+      {tab === 'past' && reservation.status === 'arrived' && reservation.rating == null && (
+        <div className="px-4 pb-3">
+          <Link
+            href={`/review/${reservation.id}`}
+            className="inline-flex items-center gap-1.5 text-[11px] font-sans text-gold hover:underline"
+          >
+            <Star size={11} className="fill-gold text-gold" />
+            Beri ulasan
+          </Link>
+        </div>
+      )}
 
       {/* Actions */}
       {(tab === 'upcoming' || tab === 'past') && (

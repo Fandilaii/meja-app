@@ -3,7 +3,7 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback } from 'react'
-import { ChevronLeft, ChevronRight, X, Loader2, Phone, Star } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X, Loader2, Phone, Star, MessageSquare } from 'lucide-react'
 import {
   getReservationsForDate,
   getRestaurantTables,
@@ -295,6 +295,30 @@ export default function KalenderPage() {
                   <Phone size={12} />
                   {selected.guestPhone}
                 </a>
+              </div>
+            )}
+
+            {selected.rating != null && (
+              <div>
+                <p className="text-[10px] font-sans text-ink/50 uppercase tracking-wider mb-1.5">Ulasan Tamu</p>
+                <div className="flex items-center gap-1 mb-1">
+                  {[1, 2, 3, 4, 5].map((n) => (
+                    <Star
+                      key={n}
+                      size={14}
+                      className={n <= selected.rating! ? 'fill-gold text-gold' : 'text-ink/20'}
+                    />
+                  ))}
+                  <span className="text-xs font-sans text-ink/60 ml-1">{selected.rating}/5</span>
+                </div>
+                {selected.reviewText && (
+                  <div className="flex items-start gap-1.5 mt-1">
+                    <MessageSquare size={11} className="text-ink/30 mt-0.5 shrink-0" />
+                    <p className="text-[11px] font-sans text-ink/70 italic leading-relaxed">
+                      "{selected.reviewText}"
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 

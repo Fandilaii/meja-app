@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import { Fraunces, DM_Sans } from 'next/font/google'
+import Script from 'next/script'
 import './globals.css'
 
 const fraunces = Fraunces({
@@ -40,7 +41,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="id" className={`${fraunces.variable} ${dmSans.variable} h-full`}>
-      <body className="min-h-full antialiased">{children}</body>
+      <body className="min-h-full antialiased">
+        {children}
+        <Script
+          id="sw-register"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `if ('serviceWorker' in navigator) { navigator.serviceWorker.register('/sw.js') }`,
+          }}
+        />
+      </body>
     </html>
   )
 }

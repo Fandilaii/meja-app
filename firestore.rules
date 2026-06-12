@@ -18,12 +18,15 @@ service cloud.firestore {
     }
 
     // ── Reservations ──────────────────────────────────────────
-    // Guests can create without an account (no login required to book).
-    // Authenticated managers can read and update (confirm, mark arrived, cancel).
-    // Nobody can delete reservations — they must be cancelled instead.
+    // Guests create without auth (no login required to book).
+    // Slot-availability queries need public list access (BookingCard, AvailabilityBadge).
+    // Guests can read their own reservation by doc ID (confirmation page).
+    // Only authenticated managers can update status or query all reservations.
     match /reservations/{reservationId} {
       allow create: if true;
-      allow read, update: if request.auth != null;
+      allow get:    if true;           // single-doc read: confirmation page, no auth needed
+      allow list:   if true;           // queries: slot availability checking by guests
+      allow update: if request.auth != null;
       allow delete: if false;
     }
 
