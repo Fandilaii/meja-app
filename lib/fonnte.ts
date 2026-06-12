@@ -14,6 +14,16 @@ export async function sendWhatsApp(phone: string, message: string) {
   return response.json()
 }
 
+export function buildReviewMessage(params: {
+  name:           string
+  restaurantName: string
+  reservationId:  string
+  appUrl:         string
+}): string {
+  const { name, restaurantName, reservationId, appUrl } = params
+  return `Halo ${name}! 😊\n\nGimana pengalaman makan malammu di *${restaurantName}*?\n\nKalau ada sebentar, bisa kasih bintang di sini:\n👉 ${appUrl}/review/${reservationId}\n\nTerima kasih sudah pilih Meja! 🪑\n— Tim Meja`
+}
+
 export function buildReminderMessage(params: {
   name:           string
   restaurantName: string

@@ -3,13 +3,14 @@
 export const dynamic = 'force-dynamic'
 
 import { useState, useEffect, useCallback } from 'react'
-import { ChevronLeft, ChevronRight, X, Loader2, Phone } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X, Loader2, Phone, Star } from 'lucide-react'
 import {
   getReservationsForDate,
   getRestaurantTables,
   updateReservationStatus,
   assignTableToReservation,
 } from '@/lib/firestore'
+import { buildReviewMessage } from '@/lib/fonnte'
 import type { Reservation, RestaurantTable } from '@/types'
 
 const RESTAURANT_ID = 'P3R1nyDl8sqYukKkculP'
@@ -54,6 +55,8 @@ export default function KalenderPage() {
   const [updating,       setUpdating]       = useState(false)
   const [tables,         setTables]         = useState<RestaurantTable[]>([])
   const [assigningTable, setAssigningTable] = useState<string | null>(null)
+  const [sendingReview,  setSendingReview]  = useState(false)
+  const [reviewSent,     setReviewSent]     = useState<string | null>(null)
 
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(monDate, i))
   const weekLabel = `${monDate.getDate()} ${MONTHS_ID[monDate.getMonth()]} – ${addDays(monDate, 6).getDate()} ${MONTHS_ID[addDays(monDate, 6).getMonth()]} ${addDays(monDate, 6).getFullYear()}`
@@ -95,6 +98,28 @@ export default function KalenderPage() {
       setSelected((s) => s ? { ...s, status } : null)
     } finally {
       setUpdating(false)
+    }
+  }
+
+  async function sendReviewPrompt() {
+    if (!selected) return
+    setSendingReview(true)
+    try {
+      const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? 'https://meja-app.vercel.app'
+      const message = buildReviewMessage({
+        name:           selected.guestName,
+        restaurantName: 'Nusa Gastronomy',
+        reservationId:  selected.id,
+        appUrl,
+      })
+      await fetch('/api/whatsapp', {
+        method:  'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ phone: selected.guestPhone, message }),
+      })
+      setReviewSent(selected.id)
+    } finally {
+      setSendingReview(false)
     }
   }
 
@@ -358,7 +383,27 @@ export default function KalenderPage() {
               </button>
             )}
 
-            {(selected.status === 'arrived' || selected.status === 'cancelled') && (
+            {selected.status === 'arrived' && (
+              reviewSent === selected.id ? (
+                <p className="text-center text-xs font-sans text-forest py-2">
+                  ✓ Permintaan ulasan terkirim
+                </p>
+              ) : (
+                <button
+                  onClick={sendReviewPrompt}
+                  disabled={sendingReview}
+                  className="w-full py-2.5 rounded-xl border border-gold/40 bg-gold-light text-[#5C3E10] font-sans text-sm font-medium hover:bg-gold/20 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
+                >
+                  {sendingReview
+                    ? <Loader2 size={13} className="animate-spin" />
+                    : <Star size={13} />
+                  }
+                  Kirim Permintaan Ulasan
+                </button>
+              )
+            )}
+
+            {selected.status === 'cancelled' && (
               <p className="text-center text-xs font-sans text-ink/40 py-2">
                 Tidak ada aksi tersedia
               </p>

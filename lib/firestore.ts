@@ -400,3 +400,13 @@ export function isSlotAvailable(
   const count = reservations.filter((r) => r.timeSlot === slot).length
   return count < totalTables
 }
+
+export async function saveReservationReview(
+  id: string,
+  rating: number,
+  reviewText?: string
+): Promise<void> {
+  const data: Record<string, unknown> = { rating }
+  if (reviewText?.trim()) data.reviewText = reviewText.trim()
+  await updateDoc(doc(requireDb(), 'reservations', id), data)
+}

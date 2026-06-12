@@ -35,6 +35,8 @@ export interface Reservation {
   status: 'pending' | 'confirmed' | 'arrived' | 'cancelled'
   referenceCode: string
   createdAt: Date
+  rating?: number
+  reviewText?: string
 }
 
 export interface WaitlistEntry {
