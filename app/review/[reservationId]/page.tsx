@@ -4,7 +4,8 @@ export const dynamic = 'force-dynamic'
 
 import { useState, useEffect } from 'react'
 import { useParams }           from 'next/navigation'
-import { Star, Loader2 }       from 'lucide-react'
+import { Star, Loader2, Share2, CheckCheck, CalendarDays } from 'lucide-react'
+import Link                    from 'next/link'
 import { getReservation, getRestaurant, saveReservationReview } from '@/lib/firestore'
 import type { Reservation, Restaurant } from '@/types'
 
@@ -27,6 +28,7 @@ export default function ReviewPage() {
   const [submitting,   setSubmitting]   = useState(false)
   const [submitted,    setSubmitted]    = useState(false)
   const [alreadyRated, setAlreadyRated] = useState(false)
+  const [shared,       setShared]       = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -75,14 +77,32 @@ export default function ReviewPage() {
 
   if (submitted || alreadyRated) {
     const displayRating = submitted ? rating : (reservation.rating ?? 0)
+    const isFiveStar    = displayRating === 5
+    const appUrl        = typeof window !== 'undefined' ? window.location.origin : 'https://meja-app.vercel.app'
+
+    async function handleShare() {
+      const text = `Pengalaman makan malamku di ${restaurant?.name} via Meja 🪑 Sangat recommended! Book juga: ${appUrl}/restaurant/${reservation?.restaurantId}`
+      if (navigator.share) {
+        try { await navigator.share({ text }); setShared(true); setTimeout(() => setShared(false), 3000); return } catch { /* dismissed */ }
+      }
+      await navigator.clipboard.writeText(text)
+      setShared(true); setTimeout(() => setShared(false), 3000)
+    }
+
     return (
-      <div className="min-h-screen bg-cream flex items-center justify-center px-4">
-        <div className="text-center max-w-sm">
-          <div className="text-5xl mb-4">🙏</div>
-          <h1 className="font-display font-bold text-ink text-2xl mb-2">Terima kasih!</h1>
+      <div className="min-h-screen bg-cream flex flex-col items-center justify-center px-4 py-12">
+        <div className="w-full max-w-sm text-center">
+          <div className="text-5xl mb-4">{isFiveStar ? '🌟' : '🙏'}</div>
+          <h1 className="font-display font-bold text-ink text-2xl mb-2">
+            {isFiveStar ? 'Luar biasa!' : 'Terima kasih!'}
+          </h1>
           <p className="text-sm font-sans text-ink/60 mb-5">
-            Ulasanmu untuk <strong>{restaurant?.name}</strong> sudah kami terima.
+            {isFiveStar
+              ? <>Senang kamu menikmati makan malammu di <strong>{restaurant?.name}</strong>! Ceritakan ke temanmu.</>
+              : <>Ulasanmu untuk <strong>{restaurant?.name}</strong> sudah kami terima.</>
+            }
           </p>
+
           <div className="flex justify-center gap-1 mb-6">
             {[1, 2, 3, 4, 5].map((s) => (
               <Star
@@ -92,8 +112,46 @@ export default function ReviewPage() {
               />
             ))}
           </div>
+
+          <div className="space-y-3">
+            {/* Share CTA — especially prominent for 5-star */}
+            {(isFiveStar || submitted) && (
+              <button
+                onClick={handleShare}
+                className={`w-full py-3 rounded-[9999px] text-sm font-sans font-medium flex items-center justify-center gap-2 transition-colors
+                  ${isFiveStar
+                    ? 'bg-ink text-cream hover:bg-ink/90'
+                    : 'border border-meja-border text-ink hover:bg-sand'
+                  }`}
+              >
+                {shared
+                  ? <><CheckCheck size={15} className="text-forest" /> Tautan Disalin!</>
+                  : <><Share2 size={15} /> Bagikan ke Temanmu</>
+                }
+              </button>
+            )}
+
+            {/* Book again */}
+            {reservation?.restaurantId && (
+              <Link
+                href={`/restaurant/${reservation.restaurantId}`}
+                className="w-full py-3 rounded-[9999px] border border-meja-border text-sm font-sans font-medium text-ink hover:bg-sand transition-colors flex items-center justify-center gap-2"
+              >
+                <CalendarDays size={15} />
+                Reservasi Lagi di {restaurant?.name}
+              </Link>
+            )}
+
+            <Link
+              href="/"
+              className="block text-center text-[11px] font-sans text-ink/40 hover:text-ink/60 transition-colors py-2"
+            >
+              Kembali ke Beranda
+            </Link>
+          </div>
+
           {alreadyRated && !submitted && (
-            <p className="text-xs font-sans text-ink/40">Kamu sudah pernah memberikan ulasan ini.</p>
+            <p className="text-xs font-sans text-ink/40 mt-4">Kamu sudah pernah memberikan ulasan ini.</p>
           )}
         </div>
       </div>

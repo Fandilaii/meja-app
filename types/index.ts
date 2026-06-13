@@ -35,6 +35,7 @@ export interface Reservation {
   status: 'pending' | 'confirmed' | 'arrived' | 'cancelled'
   referenceCode: string
   createdAt: Date
+  specialRequests?: string
   rating?: number
   reviewText?: string
 }

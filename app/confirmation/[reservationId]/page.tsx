@@ -169,6 +169,12 @@ export default function ConfirmationPage() {
                 <span className="text-sm font-sans font-medium text-ink">{value}</span>
               </div>
             ))}
+            {reservation.specialRequests && (
+              <div className="pt-1 border-t border-meja-border">
+                <p className="text-[10px] font-sans text-ink/50 uppercase tracking-wider mb-1">Catatan Khusus</p>
+                <p className="text-sm font-sans text-ink/80 italic">"{reservation.specialRequests}"</p>
+              </div>
+            )}
           </div>
         </div>
 

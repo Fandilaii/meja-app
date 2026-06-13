@@ -361,6 +361,19 @@ export async function saveGuestNote(
   )
 }
 
+/** Fetch rated reservations for a restaurant (public-facing review section) */
+export async function getRestaurantReviews(restaurantId: string): Promise<Reservation[]> {
+  const ref  = collection(requireDb(), 'reservations')
+  const q    = query(ref, where('restaurantId', '==', restaurantId), orderBy('date', 'desc'))
+  const snap = await getDocs(q)
+  const all  = snap.docs.map((d) => ({
+    id: d.id,
+    ...d.data(),
+    createdAt: (d.data().createdAt as Timestamp)?.toDate?.() ?? new Date(),
+  })) as Reservation[]
+  return all.filter((r) => r.rating != null)
+}
+
 // ── Availability helper ───────────────────────────────────────
 
 export function getAvailabilityStatus(

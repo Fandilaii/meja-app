@@ -298,6 +298,13 @@ export default function KalenderPage() {
               </div>
             )}
 
+            {selected.specialRequests && (
+              <div>
+                <p className="text-[10px] font-sans text-ink/50 uppercase tracking-wider mb-0.5">Catatan Tamu</p>
+                <p className="text-sm font-sans text-ink/80 italic leading-relaxed">"{selected.specialRequests}"</p>
+              </div>
+            )}
+
             {selected.rating != null && (
               <div>
                 <p className="text-[10px] font-sans text-ink/50 uppercase tracking-wider mb-1.5">Ulasan Tamu</p>

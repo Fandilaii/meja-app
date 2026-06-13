@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { CalendarDays, Users, Loader2, User, Phone } from 'lucide-react'
+import { CalendarDays, Users, Loader2, User, Phone, MessageSquare } from 'lucide-react'
 import GuestPicker from './GuestPicker'
 import TimeSlotPicker from './TimeSlotPicker'
 import type { Restaurant, Reservation } from '@/types'
@@ -22,9 +22,10 @@ export default function BookingCard({ restaurant }: Props) {
   const [date, setDate]             = useState(todayString())
   const [guestCount, setGuest]      = useState(2)
   const [selectedSlot, setSlot]     = useState<string | null>(null)
-  const [guestName, setName]        = useState(() => getGuestProfile()?.name  ?? '')
-  const [guestPhone, setPhone]      = useState(() => getGuestProfile()?.phone ?? '')
-  const [loading, setLoading]       = useState(false)
+  const [guestName, setName]          = useState(() => getGuestProfile()?.name  ?? '')
+  const [guestPhone, setPhone]        = useState(() => getGuestProfile()?.phone ?? '')
+  const [specialRequests, setRequests] = useState('')
+  const [loading, setLoading]         = useState(false)
   const [slotsLoading, setSlotsLoading] = useState(false)
   const [dateReservations, setDateRes]  = useState<Reservation[]>([])
   const [errors, setErrors]         = useState<{ name?: string; phone?: string }>({})
@@ -72,15 +73,16 @@ export default function BookingCard({ restaurant }: Props) {
     setLoading(true)
     try {
       const reservation = await createReservation({
-        restaurantId: restaurant.id,
-        tableId:      'auto',
-        userId:       'guest',
-        guestName:    guestName.trim(),
-        guestPhone:   normalizePhone(guestPhone.trim()),
+        restaurantId:    restaurant.id,
+        tableId:         'auto',
+        userId:          'guest',
+        guestName:       guestName.trim(),
+        guestPhone:      normalizePhone(guestPhone.trim()),
         date,
-        timeSlot:     selectedSlot,
+        timeSlot:        selectedSlot,
         guestCount,
-        status:       'confirmed',
+        status:          'confirmed',
+        ...(specialRequests.trim() ? { specialRequests: specialRequests.trim() } : {}),
       })
       addReservationId(reservation.id)
       saveGuestProfile({ name: guestName.trim(), phone: normalizePhone(guestPhone.trim()) })
@@ -188,6 +190,28 @@ export default function BookingCard({ restaurant }: Props) {
             selected={selectedSlot}
             onChange={setSlot}
           />
+        )}
+      </div>
+
+      {/* Special requests */}
+      <div>
+        <label className="block text-[11px] font-sans text-ink/60 mb-1.5">
+          Catatan Khusus <span className="text-ink/40">(opsional)</span>
+        </label>
+        <div className="relative">
+          <MessageSquare size={13} className="absolute left-3 top-3 text-ink/40 pointer-events-none" />
+          <textarea
+            value={specialRequests}
+            onChange={(e) => setRequests(e.target.value)}
+            placeholder="Contoh: kursi dekat jendela, perayaan ulang tahun, alergi kacang…"
+            rows={2}
+            maxLength={200}
+            className="w-full pl-8 pr-3 py-2.5 rounded-lg border border-meja-border bg-white text-sm font-sans text-ink
+              focus:outline-none focus:ring-2 focus:ring-gold/40 resize-none placeholder:text-ink/30"
+          />
+        </div>
+        {specialRequests.length > 150 && (
+          <p className="text-[10px] font-sans text-ink/40 text-right mt-0.5">{specialRequests.length}/200</p>
         )}
       </div>
 
